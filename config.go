@@ -4,6 +4,7 @@ const BranchIOProductionUri = "https://api2.branch.io"
 
 //Common config
 type Config struct {
+	AppId  string
 	Uri    string
 	Key    string
 	Secret string
