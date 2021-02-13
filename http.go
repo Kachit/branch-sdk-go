@@ -108,9 +108,17 @@ func (r *Response) GetRawResponse() *http.Response {
 	return r.raw
 }
 
-func (r *Response) GetRawBody() (string, error) {
+func (r *Response) GetRawBody() string {
+	body, _ := r.ReadBody()
+	return string(body)
+}
+
+func (r *Response) Unmarshal(v interface{}) error {
 	data, err := r.ReadBody()
-	return string(data), err
+	if err != nil {
+		return fmt.Errorf("Response@Unmarshal read body: %v", err)
+	}
+	return json.Unmarshal(data, &v)
 }
 
 func (r *Response) UnmarshalError(v interface{}) error {

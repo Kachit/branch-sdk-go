@@ -1,7 +1,5 @@
 package branchio
 
-const BranchIOProductionUri = "https://api2.branch.io"
-
 //Common config
 type Config struct {
 	AppId  string
@@ -13,7 +11,7 @@ type Config struct {
 //Create new config from credentials
 func NewConfig(key string, secret string) *Config {
 	cfg := &Config{
-		Uri:    BranchIOProductionUri,
+		Uri:    ProdAPIUrl,
 		Key:    key,
 		Secret: secret,
 	}
