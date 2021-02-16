@@ -2,6 +2,7 @@ package branchio
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -121,6 +122,14 @@ func (r *Response) Unmarshal(v interface{}) error {
 	return json.Unmarshal(data, &v)
 }
 
+func (r *Response) UnmarshalGzip(v interface{}) error {
+	data, err := r.ReadGzipBody()
+	if err != nil {
+		return fmt.Errorf("Response@Unmarshal read gzip body: %v", err)
+	}
+	return json.Unmarshal(data, &v)
+}
+
 func (r *Response) UnmarshalError(v interface{}) error {
 	body, err := r.ReadBody()
 	if err != nil {
@@ -132,6 +141,13 @@ func (r *Response) UnmarshalError(v interface{}) error {
 func (r *Response) ReadBody() ([]byte, error) {
 	defer r.raw.Body.Close()
 	return ioutil.ReadAll(r.raw.Body)
+}
+
+func (r *Response) ReadGzipBody() ([]byte, error) {
+	defer r.raw.Body.Close()
+	zr, _ := gzip.NewReader(r.raw.Body)
+	defer zr.Close()
+	return ioutil.ReadAll(zr)
 }
 
 func NewResponse(raw *http.Response) *Response {
