@@ -86,9 +86,9 @@ func Test_Types_CustomFloat64_UnmarshalCSVError(t *testing.T) {
 
 func Test_Types_CustomTimestamp_UnmarshalCSVFilled(t *testing.T) {
 	c := CustomTimestamp{}
-	str := "2020-09-10 15:15:15"
+	str := "2020-09-10 15:15:15+0000"
 	_ = c.UnmarshalCSV(str)
-	assert.Equal(t, "2020-09-10 15:15:15", c.Value().Format(CustomTimestampFormatDefault))
+	assert.Equal(t, "2020-09-10 15:15:15+0000", c.Value().Format(CustomTimestampFormatDefault))
 }
 
 func Test_Types_CustomTimestamp_UnmarshalCSVEmpty(t *testing.T) {
@@ -103,14 +103,14 @@ func Test_Types_CustomTimestamp_UnmarshalCSVError(t *testing.T) {
 	str := "foo"
 	err := c.UnmarshalCSV(str)
 	assert.Error(t, err)
-	assert.Equal(t, `CustomTimestamp@UnmarshalJSON ParseTime: parsing time "foo" as "2006-01-02 15:04:05": cannot parse "foo" as "2006"`, err.Error())
+	assert.Equal(t, `CustomTimestamp@UnmarshalJSON ParseTime: parsing time "foo" as "2006-01-02 15:04:05-0700": cannot parse "foo" as "2006"`, err.Error())
 }
 
 func Test_Types_CustomTimestamp_MarshalJSONSuccess(t *testing.T) {
 	c := CustomTimestamp{}
 	c.Timestamp = time.Date(2020, time.Month(1), 20, 0, 0, 0, 0, time.UTC)
 	result, err := c.MarshalJSON()
-	assert.Equal(t, []byte(`"2020-01-20 00:00:00"`), result)
+	assert.Equal(t, []byte(`"2020-01-20 00:00:00+0000"`), result)
 	assert.Nil(t, err)
 }
 

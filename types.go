@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const CustomTimestampFormatDefault = "2006-01-02 15:04:05"
+const CustomTimestampFormatDefault = "2006-01-02 15:04:05-0700"
 const CustomDateFormatDefault = "2006-01-02"
 const CustomDateFormatSlash = "01/02/2006"
 
