@@ -99,6 +99,7 @@ func (t *Transport) Post(path string, body map[string]interface{}, query map[str
 
 type Response struct {
 	raw *http.Response
+	csv *CSV
 }
 
 func (r *Response) IsSuccess() bool {
@@ -122,12 +123,12 @@ func (r *Response) Unmarshal(v interface{}) error {
 	return json.Unmarshal(data, &v)
 }
 
-func (r *Response) UnmarshalGzip(v interface{}) error {
+func (r *Response) UnmarshalCSV(v interface{}) error {
 	data, err := r.ReadGzipBody()
 	if err != nil {
 		return fmt.Errorf("Response@Unmarshal read gzip body: %v", err)
 	}
-	return json.Unmarshal(data, &v)
+	return r.csv.Unmarshal(data, v)
 }
 
 func (r *Response) UnmarshalError(v interface{}) error {
@@ -151,5 +152,5 @@ func (r *Response) ReadGzipBody() ([]byte, error) {
 }
 
 func NewResponse(raw *http.Response) *Response {
-	return &Response{raw: raw}
+	return &Response{raw: raw, csv: &CSV{}}
 }

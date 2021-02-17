@@ -1,5 +1,9 @@
 # Branch.io SDK GO (Unofficial)
-Golang SDK for Branch.io API (Unofficial)
+[![Build Status](https://travis-ci.org/Kachit/branch-sdk-go.svg?branch=master)](https://travis-ci.org/Kachit/branch-sdk-go)
+[![codecov](https://codecov.io/gh/Kachit/branch-sdk-go/branch/master/graph/badge.svg)](https://codecov.io/gh/Kachit/branch-sdk-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kachit/branch-sdk-go)](https://goreportcard.com/report/github.com/kachit/branch-sdk-go)
+[![Release](https://img.shields.io/github/v/release/Kachit/branch-sdk-go.svg)](https://github.com/Kachit/branch-sdk-go/releases)
+[![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/kachit/branch-sdk-go/blob/master/LICENSE)
 
 ## Description
 Unofficial Branch.io API Client for Go

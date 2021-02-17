@@ -1,6 +1,7 @@
 package branchio
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -20,9 +21,12 @@ func (r *ExportResource) GetEventOntology(date time.Time) (*Response, error) {
 }
 
 /**
- * @unmarshal ClickEvent
+ * @unmarshal Event
  */
 func (r *ExportResource) GetEventData(link string) (*Response, error) {
 	rsp, err := r.tr.http.Get(link)
+	if err != nil {
+		return nil, fmt.Errorf("ExportResource@GetEventData error: %v", err)
+	}
 	return NewResponse(rsp), err
 }
