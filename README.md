@@ -17,7 +17,7 @@ package main
 
 import (
 	"fmt"
-	branchio_sdk "github.com/kachit/branchio-sdk-go"
+	branchio_sdk "github.com/kachit/branch-sdk-go"
 	"time"
 )
 
@@ -25,6 +25,6 @@ func main(){
         cfg := branchio_sdk.NewConfig("key_live", "secret_live")
         client := branchio_sdk.NewClientFromConfig(cfg, nil)
         now := time.Date(2021, 1, 30, 0, 0, 0, 0, time.Local)
-        response, err := client.Exports().LinksList(now)
+        response, err := client.Export().GetEventOntology(now)
 }
 ```

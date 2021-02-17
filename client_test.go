@@ -10,8 +10,8 @@ func Test_Client_NewClientFromConfig(t *testing.T) {
 	assert.NotEmpty(t, client)
 }
 
-func Test_Client_GetExportsResource(t *testing.T) {
+func Test_Client_GetExportResource(t *testing.T) {
 	client := NewClientFromConfig(BuildStubConfig(), nil)
-	result := client.Exports()
+	result := client.Export()
 	assert.NotEmpty(t, result)
 }
