@@ -2,6 +2,7 @@ package branchio
 
 import (
 	"bytes"
+	"compress/gzip"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -28,4 +29,22 @@ func BuildStubResponseFromFile(statusCode int, path string) *http.Response {
 	data, _ := LoadStubResponseData(path)
 	body := ioutil.NopCloser(bytes.NewReader(data))
 	return &http.Response{Body: body, StatusCode: statusCode}
+}
+
+func buildStubResponseFromGzip(statusCode int, path string) *http.Response {
+	data, _ := loadStubResponseDataGzipped(path)
+	body := ioutil.NopCloser(bytes.NewReader(data))
+	return &http.Response{Body: body, StatusCode: statusCode}
+}
+
+func loadStubResponseDataGzipped(path string) ([]byte, error) {
+	var buf bytes.Buffer
+	zw := gzip.NewWriter(&buf)
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	_, err = zw.Write(data)
+	err = zw.Close()
+	return buf.Bytes(), err
 }

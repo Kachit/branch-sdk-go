@@ -15,7 +15,7 @@ func Test_Resources_Resource_Get(t *testing.T) {
 	transport := NewHttpTransport(cfg, nil)
 	resource := NewResourceAbstract(transport)
 
-	body, _ := LoadStubResponseData("stubs/data/exports/export.success.json")
+	body, _ := LoadStubResponseData("stubs/data/export/success.empty.json")
 
 	httpmock.RegisterResponder("GET", cfg.Uri+"/foo", httpmock.NewBytesResponder(http.StatusOK, body))
 
@@ -31,7 +31,7 @@ func Test_Resources_Resource_Post(t *testing.T) {
 	transport := NewHttpTransport(cfg, nil)
 	resource := NewResourceAbstract(transport)
 
-	body, _ := LoadStubResponseData("stubs/data/exports/export.success.json")
+	body, _ := LoadStubResponseData("stubs/data/export/success.empty.json")
 
 	httpmock.RegisterResponder("POST", cfg.Uri+"/foo", httpmock.NewBytesResponder(http.StatusOK, body))
 
