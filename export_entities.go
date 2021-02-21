@@ -1,5 +1,6 @@
 package branchio
 
+//EventOntology common structure
 type EventOntology struct {
 	Click         []string `json:"eo_click"`
 	CommerceEvent []string `json:"eo_commerce_event"`
@@ -9,6 +10,7 @@ type EventOntology struct {
 	Reinstall     []string `json:"eo_reinstall"`
 }
 
+//Event common structure
 type Event struct {
 	Id                                                 CustomInteger   `csv:"id" json:"id"`
 	Name                                               string          `csv:"name" json:"name"`
