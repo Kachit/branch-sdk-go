@@ -1,6 +1,6 @@
 package branchio
 
-//Common config
+//Config structure
 type Config struct {
 	AppId  string
 	Uri    string
@@ -8,7 +8,7 @@ type Config struct {
 	Secret string
 }
 
-//Create new config from credentials
+//NewConfig Create new config from credentials
 func NewConfig(key string, secret string) *Config {
 	cfg := &Config{
 		Uri:    ProdAPIUrl,

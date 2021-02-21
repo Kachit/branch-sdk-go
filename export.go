@@ -5,13 +5,13 @@ import (
 	"time"
 )
 
+//ExportResource resource wrapper
 type ExportResource struct {
 	*ResourceAbstract
 }
 
-/**
- * @unmarshal EventOntology
- */
+//GetEventOntology Get events ontology data
+//@unmarshal EventOntology
 func (r *ExportResource) GetEventOntology(date time.Time) (*Response, error) {
 	post := make(map[string]interface{})
 	post["export_date"] = date.Format("2006-01-02")
@@ -20,9 +20,8 @@ func (r *ExportResource) GetEventOntology(date time.Time) (*Response, error) {
 	return r.Post("v3/export", post, nil)
 }
 
-/**
- * @unmarshal Event
- */
+//GetEventData Get event data by link
+//@unmarshal EventOntology
 func (r *ExportResource) GetEventData(link string) (*Response, error) {
 	rsp, err := r.tr.http.Get(link)
 	if err != nil {
