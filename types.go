@@ -10,8 +10,6 @@ import (
 )
 
 const CustomTimestampFormatDefault = "2006-01-02 15:04:05-0700"
-const CustomDateFormatDefault = "2006-01-02"
-const CustomDateFormatSlash = "01/02/2006"
 
 //Custom integer type
 type CustomInteger struct {
@@ -106,48 +104,6 @@ func (ct *CustomTimestamp) MarshalJSON() ([]byte, error) {
 	jsonData, err := json.Marshal(formatted)
 	if err != nil {
 		return nil, errors.New("CustomTimestamp@MarshalJSON: " + err.Error())
-	}
-	return jsonData, err
-}
-
-//Custom date type
-type CustomDate struct {
-	Date time.Time
-}
-
-//Custom date get value
-func (ct *CustomDate) Value() time.Time {
-	return ct.Date
-}
-
-//Custom date UnmarshalCSV
-func (ct *CustomDate) UnmarshalCSV(csv string) error {
-	if csv == "" {
-		return nil
-	}
-
-	var format string
-	if strings.Contains(csv, `/`) {
-		format = CustomDateFormatSlash
-	} else {
-		format = CustomDateFormatDefault
-	}
-	var err error
-	ct.Date, err = time.Parse(format, csv)
-	if err != nil {
-		return fmt.Errorf("CustomDate@UnmarshalJSON ParseTime: %v", err)
-	}
-	return nil
-}
-
-//Custom date MarshalJSON
-func (ct *CustomDate) MarshalJSON() ([]byte, error) {
-	if ct.Date.IsZero() {
-		return []byte(`""`), nil
-	}
-	jsonData, err := json.Marshal(ct.Date.Format(CustomDateFormatDefault))
-	if err != nil {
-		return nil, errors.New("CustomDate@MarshalJSON: " + err.Error())
 	}
 	return jsonData, err
 }

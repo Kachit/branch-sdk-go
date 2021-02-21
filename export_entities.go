@@ -83,8 +83,8 @@ type Event struct {
 	LastCtaViewDataDollar3P                            string          `csv:"last_cta_view_data_dollar_3p" json:"last_cta_view_data_dollar_3p"`
 	LastCtaViewDataPlusWebFormat                       string          `csv:"last_cta_view_data_plus_web_format" json:"last_cta_view_data_plus_web_format"`
 	LastCtaViewDataCustomFields                        string          `csv:"last_cta_view_data_custom_fields" json:"last_cta_view_data_custom_fields"`
-	DeepLinked                                         string          `csv:"deep_linked" json:"deep_linked"`
-	FirstEventForUser                                  string          `csv:"first_event_for_user" json:"first_event_for_user"`
+	DeepLinked                                         CustomBoolean   `csv:"deep_linked" json:"deep_linked"`
+	FirstEventForUser                                  CustomBoolean   `csv:"first_event_for_user" json:"first_event_for_user"`
 	UserDataOs                                         string          `csv:"user_data_os" json:"user_data_os"`
 	UserDataOsVersion                                  string          `csv:"user_data_os_version" json:"user_data_os_version"`
 	UserDataModel                                      string          `csv:"user_data_model" json:"user_data_model"`
@@ -106,10 +106,10 @@ type Event struct {
 	UserDataLanguage                                   string          `csv:"user_data_language" json:"user_data_language"`
 	UserDataBrand                                      string          `csv:"user_data_brand" json:"user_data_brand"`
 	DiMatchClickToken                                  CustomInteger   `csv:"di_match_click_token" json:"di_match_click_token"`
-	EventDataRevenueInUsd                              string          `csv:"event_data_revenue_in_usd" json:"event_data_revenue_in_usd"`
-	EventDataExchangeRate                              string          `csv:"event_data_exchange_rate" json:"event_data_exchange_rate"`
+	EventDataRevenueInUsd                              CustomFloat64   `csv:"event_data_revenue_in_usd" json:"event_data_revenue_in_usd"`
+	EventDataExchangeRate                              CustomFloat64   `csv:"event_data_exchange_rate" json:"event_data_exchange_rate"`
 	EventDataTransactionId                             string          `csv:"event_data_transaction_id" json:"event_data_transaction_id"`
-	EventDataRevenue                                   string          `csv:"event_data_revenue" json:"event_data_revenue"`
+	EventDataRevenue                                   CustomFloat64   `csv:"event_data_revenue" json:"event_data_revenue"`
 	EventDataCurrency                                  string          `csv:"event_data_currency" json:"event_data_currency"`
 	EventDataShipping                                  string          `csv:"event_data_shipping" json:"event_data_shipping"`
 	EventDataTax                                       string          `csv:"event_data_tax" json:"event_data_tax"`

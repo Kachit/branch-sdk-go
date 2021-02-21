@@ -121,50 +121,6 @@ func Test_Types_CustomTimestamp_MarshalJSONEmpty(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func Test_Types_CustomDate_UnmarshalCSVFilled(t *testing.T) {
-	c := CustomDate{}
-	str := "2020-09-10"
-	_ = c.UnmarshalCSV(str)
-	assert.Equal(t, "2020-09-10", c.Value().Format(CustomDateFormatDefault))
-}
-
-func Test_Types_CustomDate_UnmarshalCSVFilledWithSlash(t *testing.T) {
-	c := CustomDate{}
-	str := "09/10/2020"
-	_ = c.UnmarshalCSV(str)
-	assert.Equal(t, "2020-09-10", c.Value().Format(CustomDateFormatDefault))
-}
-
-func Test_Types_CustomDate_UnmarshalCSVEmpty(t *testing.T) {
-	c := CustomDate{}
-	str := ""
-	_ = c.UnmarshalCSV(str)
-	assert.True(t, c.Value().IsZero())
-}
-
-func Test_Types_CustomDate_UnmarshalCSVError(t *testing.T) {
-	c := CustomDate{}
-	str := "foo"
-	err := c.UnmarshalCSV(str)
-	assert.Error(t, err)
-	assert.Equal(t, `CustomDate@UnmarshalJSON ParseTime: parsing time "foo" as "2006-01-02": cannot parse "foo" as "2006"`, err.Error())
-}
-
-func Test_Types_CustomDate_MarshalJSONSuccess(t *testing.T) {
-	c := CustomDate{}
-	c.Date = time.Date(2020, time.Month(1), 20, 0, 0, 0, 0, time.UTC)
-	result, err := c.MarshalJSON()
-	assert.Equal(t, []byte(`"2020-01-20"`), result)
-	assert.Nil(t, err)
-}
-
-func Test_Types_CustomDate_MarshalJSONEmpty(t *testing.T) {
-	c := CustomDate{}
-	result, err := c.MarshalJSON()
-	assert.Equal(t, []byte(`""`), result)
-	assert.Nil(t, err)
-}
-
 func Test_Types_CustomBoolean_UnmarshalCSVTrue(t *testing.T) {
 	c := CustomBoolean{}
 	str := "true"
