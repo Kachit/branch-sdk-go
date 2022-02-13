@@ -11,7 +11,7 @@ Unofficial Branch.io API Client for Go
 ## API documentation
 https://help.branch.io/developers-hub/docs/daily-exports
 
-## Download
+## Installation
 ```shell
 go get -u github.com/kachit/branch-sdk-go
 ```
