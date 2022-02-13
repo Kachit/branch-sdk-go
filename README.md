@@ -15,7 +15,7 @@ https://help.branch.io/developers-hub/docs/daily-exports
 ```shell
 go get -u github.com/kachit/branch-sdk-go
 ```
-
+## Usage
 ```go
 package main
 
