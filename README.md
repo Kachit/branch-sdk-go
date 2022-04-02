@@ -28,7 +28,7 @@ import (
 func main(){
         cfg := branchio_sdk.NewConfig("key_live", "secret_live")
         client := branchio_sdk.NewClientFromConfig(cfg, nil)
-        now := time.Date(2021, 1, 30, 0, 0, 0, 0, time.Local)
-        response, err := client.Export().GetEventOntology(now)
+        dt := time.Date(2021, 1, 30, 0, 0, 0, 0, time.Local)
+        response, err := client.Export().GetEventOntology(dt)
 }
 ```
