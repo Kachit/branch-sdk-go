@@ -175,3 +175,8 @@ func (r *Response) ReadGzipBody() ([]byte, error) {
 func NewResponse(raw *http.Response) *Response {
 	return &Response{raw: raw, csv: &CSV{}}
 }
+
+//UnmarshalJson method
+func UnmarshalJson(data []byte, v interface{}) error {
+	return json.Unmarshal(data, &v)
+}

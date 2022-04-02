@@ -1,6 +1,12 @@
 package branchio
 
-import "fmt"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+)
 
 //ResourceAbstract base resource
 type ResourceAbstract struct {
@@ -8,22 +14,16 @@ type ResourceAbstract struct {
 	cfg *Config
 }
 
-//Get HTTP method wrapper
-func (r *ResourceAbstract) Get(path string, query map[string]interface{}) (*Response, error) {
-	rsp, err := r.tr.Get(path, query)
+//UnmarshalResponse method
+func (ra *ResourceAbstract) unmarshalResponse(resp *http.Response, v interface{}) error {
+	defer resp.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("ResourceAbstract@get request: %v", err)
+		return fmt.Errorf("ResourceAbstract.unmarshalResponse read body: %v", err)
 	}
-	return NewResponse(rsp), nil
-}
-
-//Post HTTP method wrapper
-func (r *ResourceAbstract) Post(path string, body map[string]interface{}, query map[string]interface{}) (*Response, error) {
-	rsp, err := r.tr.Post(path, body, query)
-	if err != nil {
-		return nil, fmt.Errorf("ResourceAbstract@post request: %v", err)
-	}
-	return NewResponse(rsp), nil
+	//reset the response body to the original unread state
+	resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	return json.Unmarshal(bodyBytes, &v)
 }
 
 //NewResourceAbstract Create new resource abstract
