@@ -27,7 +27,7 @@ import (
 
 func main(){
     // Create a client instance
-    cfg := branchio.NewConfig("key_live", "secret_live")
+    cfg := branchio.NewConfig("Your Branch key of the originating app", "Your Branch secret key of the originating app")
     client, err := branchio.NewClientFromConfig(cfg, nil)
     if err != nil {
         fmt.Printf("config parameter error " + err.Error())

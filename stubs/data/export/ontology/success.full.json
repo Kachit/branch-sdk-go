@@ -1,1 +1,17 @@
-{}
+{
+  "eo_branch_cta_view": ["https://branch-exports-web.foo-bar.amazonaws.com"],
+  "eo_click": ["https://branch-exports-web.foo-bar.amazonaws.com"],
+  "eo_commerce_event": ["https://branch-exports-web.foo-bar.amazonaws.com"],
+  "eo_content_event": ["https://branch-exports-web.foo-bar.amazonaws.com"],
+  "eo_custom_event": ["https://branch-exports-web.foo-bar.amazonaws.com"],
+  "eo_impression": ["https://branch-exports-web.foo-bar.amazonaws.com"],
+  "eo_install": ["https://branch-exports-web.foo-bar.amazonaws.com"],
+  "eo_open": ["https://branch-exports-web.foo-bar.amazonaws.com"],
+  "eo_pageview": ["https://branch-exports-web.foo-bar.amazonaws.com"],
+  "eo_reinstall": ["https://branch-exports-web.foo-bar.amazonaws.com"],
+  "eo_sms_sent": ["https://branch-exports-web.foo-bar.amazonaws.com"],
+  "eo_user_lifecycle_event": ["https://branch-exports-web.foo-bar.amazonaws.com"],
+  "eo_web_session_start": ["https://branch-exports-web.foo-bar.amazonaws.com"],
+  "eo_web_to_app_auto_redirect": ["https://branch-exports-web.foo-bar.amazonaws.com"],
+  "eo_dismissal": ["https://branch-exports-web.foo-bar.amazonaws.com"]
+}

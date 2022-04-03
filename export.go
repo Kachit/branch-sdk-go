@@ -42,6 +42,14 @@ func (r *EventOntology) IsEmpty() bool {
 	return len(r.Click) == 0
 }
 
+//EventResponse struct
+type EventResponse struct {
+	*ResponseBody
+	Data *EventsCollection `json:"data,omitempty"`
+}
+
+type EventsCollection []*Event
+
 //Event common struct
 type Event struct {
 	Id                                                 CustomInteger   `csv:"id" json:"id"`
@@ -200,7 +208,7 @@ func (r *ExportResource) GetEventOntology(ctx context.Context, date time.Time) (
 		var data EventOntology
 		err = r.unmarshalResponse(rsp, &data)
 		if err != nil {
-			return nil, rsp, fmt.Errorf("ExportResource.GetEventOntology error: %v", err)
+			return &result, rsp, fmt.Errorf("ExportResource.GetEventOntology error: %v", err)
 		}
 		if !data.IsEmpty() {
 			result.Data = &data
@@ -208,7 +216,7 @@ func (r *ExportResource) GetEventOntology(ctx context.Context, date time.Time) (
 	} else {
 		err = r.unmarshalResponse(rsp, &result)
 		if err != nil {
-			return nil, rsp, fmt.Errorf("ExportResource.GetEventOntology error: %v", err)
+			return &result, rsp, fmt.Errorf("ExportResource.GetEventOntology error: %v", err)
 		}
 		return &result, rsp, fmt.Errorf(result.GetError())
 	}
@@ -216,10 +224,22 @@ func (r *ExportResource) GetEventOntology(ctx context.Context, date time.Time) (
 }
 
 //GetEventData Get event data by link
-func (r *ExportResource) GetEventData(ctx context.Context, link string) (*http.Response, error) {
+func (r *ExportResource) GetEventData(ctx context.Context, link string) (*EventResponse, *http.Response, error) {
 	rsp, err := r.tr.http.Get(link)
 	if err != nil {
-		return nil, fmt.Errorf("ExportResource.GetEventData error: %v", err)
+		return nil, nil, fmt.Errorf("ExportResource.GetEventData error: %v", err)
 	}
-	return rsp, err
+	result := EventResponse{ResponseBody: &ResponseBody{}}
+	result.status = rsp.StatusCode
+	if result.IsSuccess() {
+		events := EventsCollection{}
+		err = r.unmarshalResponse(rsp, &events)
+		if err != nil {
+			return &result, rsp, fmt.Errorf("ExportResource.GetEventData error: %v", err)
+		}
+		result.Data = &events
+	} else {
+		return &result, rsp, fmt.Errorf(result.GetError())
+	}
+	return &result, rsp, err
 }

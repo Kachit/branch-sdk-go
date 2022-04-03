@@ -1,0 +1,6 @@
+{
+  "error": {
+    "message": "Invalid or missing app id, Branch key, or secret",
+    "code": 400
+  }
+}

@@ -1,10 +1,7 @@
 package branchio
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -16,15 +13,20 @@ type ResourceAbstract struct {
 
 //UnmarshalResponse method
 func (ra *ResourceAbstract) unmarshalResponse(resp *http.Response, v interface{}) error {
-	defer resp.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	//fmt.Println(string(bodyBytes))
+	contentType := resp.Header.Get("Content-Type")
+	responseHandler := NewResponseHandler(contentType)
+
+	bodyBytes, err := responseHandler.ReadBody(resp)
 	if err != nil {
 		return fmt.Errorf("ResourceAbstract.unmarshalResponse read body: %v", err)
 	}
 	//reset the response body to the original unread state
-	resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-	return json.Unmarshal(bodyBytes, &v)
+	body, err := responseHandler.RestoreBody(bodyBytes)
+	if err != nil {
+		return fmt.Errorf("ResourceAbstract.unmarshalResponse read body: %v", err)
+	}
+	resp.Body = body
+	return responseHandler.UnmarshalBody(bodyBytes, &v)
 }
 
 //NewResourceAbstract Create new resource abstract

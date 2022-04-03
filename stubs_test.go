@@ -10,10 +10,14 @@ import (
 
 func BuildStubConfig() *Config {
 	return &Config{
-		Uri:    "https://github.com",
+		Uri:    ProdAPIUrl,
 		Key:    "Key",
 		Secret: "Secret",
 	}
+}
+
+func BuildStubHttpTransport() *Transport {
+	return NewHttpTransport(BuildStubConfig(), &http.Client{})
 }
 
 func LoadStubResponseData(path string) ([]byte, error) {

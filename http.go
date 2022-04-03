@@ -13,6 +13,9 @@ import (
 	"strings"
 )
 
+const ResponseContentTypeJson = "application/json; charset=utf-8"
+const ResponseContentTypeOctetStream = "application/octet-stream"
+
 //NewDefaultHttpClient create new http client
 func NewDefaultHttpClient() *http.Client {
 	tr := &http.Transport{}
@@ -122,74 +125,6 @@ func (t *Transport) Post(ctx context.Context, path string, body map[string]inter
 	return t.SendRequest(ctx, http.MethodPost, path, query, body)
 }
 
-//Response wrapper
-type Response struct {
-	raw *http.Response
-	csv *CSV
-}
-
-//IsSuccess method
-func (r *Response) IsSuccess() bool {
-	return r.raw.StatusCode < http.StatusMultipleChoices
-}
-
-//GetRawResponse method
-func (r *Response) GetRawResponse() *http.Response {
-	return r.raw
-}
-
-//GetRawBody method
-func (r *Response) GetRawBody() string {
-	body, _ := r.ReadBody()
-	return string(body)
-}
-
-//Unmarshal method
-func (r *Response) Unmarshal(v interface{}) error {
-	data, err := r.ReadBody()
-	if err != nil {
-		return fmt.Errorf("Response@Unmarshal read body: %v", err)
-	}
-	return json.Unmarshal(data, &v)
-}
-
-//UnmarshalCSV method
-func (r *Response) UnmarshalCSV(v interface{}) error {
-	data, err := r.ReadGzipBody()
-	if err != nil {
-		return fmt.Errorf("Response@Unmarshal read gzip body: %v", err)
-	}
-	return r.csv.Unmarshal(data, v)
-}
-
-//UnmarshalError method
-func (r *Response) UnmarshalError(v interface{}) error {
-	body, err := r.ReadBody()
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(body, v)
-}
-
-//ReadBody method
-func (r *Response) ReadBody() ([]byte, error) {
-	defer r.raw.Body.Close()
-	return ioutil.ReadAll(r.raw.Body)
-}
-
-//ReadGzipBody method
-func (r *Response) ReadGzipBody() ([]byte, error) {
-	defer r.raw.Body.Close()
-	zr, _ := gzip.NewReader(r.raw.Body)
-	defer zr.Close()
-	return ioutil.ReadAll(zr)
-}
-
-//NewResponse create new response
-func NewResponse(raw *http.Response) *Response {
-	return &Response{raw: raw, csv: &CSV{}}
-}
-
 //ResponseBody struct
 type ResponseBody struct {
 	status int
@@ -216,12 +151,72 @@ func (r *ResponseBody) GetError() string {
 	return err
 }
 
-//IsEmptyObjectResponseData func
-func isEmptyObjectResponseData(data []byte) bool {
-	return data[0] == 123 && data[1] == 125
+type ResponseHandlerInterface interface {
+	ReadBody(resp *http.Response) ([]byte, error)
+	UnmarshalBody(data []byte, v interface{}) error
+	RestoreBody(data []byte) (io.ReadCloser, error)
 }
 
-//UnmarshalJson method
-func UnmarshalJson(data []byte, v interface{}) error {
+type ResponseHandlerJson struct {
+}
+
+func (r *ResponseHandlerJson) ReadBody(resp *http.Response) ([]byte, error) {
+	defer resp.Body.Close()
+	return ioutil.ReadAll(resp.Body)
+}
+
+func (r *ResponseHandlerJson) UnmarshalBody(data []byte, v interface{}) error {
 	return json.Unmarshal(data, &v)
+}
+
+func (r *ResponseHandlerJson) RestoreBody(data []byte) (io.ReadCloser, error) {
+	return ioutil.NopCloser(bytes.NewBuffer(data)), nil
+}
+
+type ResponseHandlerStream struct {
+	csv *CSV
+}
+
+func (r *ResponseHandlerStream) ReadBody(resp *http.Response) ([]byte, error) {
+	defer resp.Body.Close()
+	zr, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	defer zr.Close()
+	return ioutil.ReadAll(zr)
+}
+
+func (r *ResponseHandlerStream) UnmarshalBody(data []byte, v interface{}) error {
+	return r.csv.Unmarshal(data, v)
+}
+
+func (r *ResponseHandlerStream) RestoreBody(data []byte) (io.ReadCloser, error) {
+	var b bytes.Buffer
+	gz := gzip.NewWriter(&b)
+	_, err := gz.Write(data)
+	if err != nil {
+		return nil, err
+	}
+	if err = gz.Flush(); err != nil {
+		return nil, err
+	}
+
+	if err = gz.Close(); err != nil {
+		return nil, err
+	}
+	return ioutil.NopCloser(bytes.NewBuffer(b.Bytes())), nil
+}
+
+func NewResponseHandler(contentType string) ResponseHandlerInterface {
+	var handler ResponseHandlerInterface
+	switch contentType {
+	case ResponseContentTypeJson:
+		handler = &ResponseHandlerJson{}
+		break
+	case ResponseContentTypeOctetStream:
+		handler = &ResponseHandlerStream{csv: &CSV{}}
+		break
+	}
+	return handler
 }
