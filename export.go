@@ -1,6 +1,7 @@
 package branchio
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -184,12 +185,12 @@ type ExportResource struct {
 }
 
 //GetEventOntology Get events ontology data
-func (r *ExportResource) GetEventOntology(date time.Time) (*EventOntologyResponse, *http.Response, error) {
+func (r *ExportResource) GetEventOntology(ctx context.Context, date time.Time) (*EventOntologyResponse, *http.Response, error) {
 	post := make(map[string]interface{})
 	post["export_date"] = date.Format("2006-01-02")
 	post["branch_key"] = r.cfg.Key
 	post["branch_secret"] = r.cfg.Secret
-	rsp, err := r.tr.Post("v3/export", post, nil)
+	rsp, err := r.tr.Post(ctx, "v3/export", post, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("ExportResource.GetEventOntology error: %v", err)
 	}
@@ -215,7 +216,7 @@ func (r *ExportResource) GetEventOntology(date time.Time) (*EventOntologyRespons
 }
 
 //GetEventData Get event data by link
-func (r *ExportResource) GetEventData(link string) (*http.Response, error) {
+func (r *ExportResource) GetEventData(ctx context.Context, link string) (*http.Response, error) {
 	rsp, err := r.tr.http.Get(link)
 	if err != nil {
 		return nil, fmt.Errorf("ExportResource.GetEventData error: %v", err)

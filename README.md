@@ -37,6 +37,7 @@ func main(){
 ```
 ### Get events ontology
 ```go
+ctx := context.Background()
 dt := time.Date(2022, 1, 30, 0, 0, 0, 0, time.Local)
-result, response, err := client.Export().GetEventOntology(dt)
+result, response, err := client.Export().GetEventOntology(ctx, dt)
 ```

@@ -3,6 +3,7 @@ package branchio
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -27,7 +28,7 @@ type RequestBuilder struct {
 func (rb *RequestBuilder) buildUri(path string, query map[string]interface{}) (uri *url.URL, err error) {
 	u, err := url.Parse(rb.cfg.Uri)
 	if err != nil {
-		return nil, fmt.Errorf("RequestBuilder@buildUri parse: %v", err)
+		return nil, fmt.Errorf("RequestBuilder.buildUri parse: %v", err)
 	}
 	u.Path = "/" + path
 	u.RawQuery = rb.buildQueryParams(query)
@@ -56,9 +57,35 @@ func (rb *RequestBuilder) buildHeaders() http.Header {
 func (rb *RequestBuilder) buildBody(data map[string]interface{}) (io.Reader, error) {
 	b, err := json.Marshal(data)
 	if err != nil {
-		return nil, fmt.Errorf("RequestBuilder@buildBody json convert: %v", err)
+		return nil, fmt.Errorf("RequestBuilder.buildBody json convert: %v", err)
 	}
 	return bytes.NewBuffer(b), nil
+}
+
+//BuildRequest method
+func (rb *RequestBuilder) BuildRequest(ctx context.Context, method string, path string, query map[string]interface{}, body map[string]interface{}) (req *http.Request, err error) {
+	method = strings.ToUpper(method)
+	//build body
+	var bodyReader io.Reader
+	if method == http.MethodPost {
+		bodyReader, err = rb.buildBody(body)
+		if err != nil {
+			return nil, fmt.Errorf("transport.request build request body: %v", err)
+		}
+	}
+	//build uri
+	uri, err := rb.buildUri(path, query)
+	if err != nil {
+		return nil, fmt.Errorf("transport.request build uri: %v", err)
+	}
+	//build request
+	req, err = http.NewRequestWithContext(ctx, method, uri.String(), bodyReader)
+	if err != nil {
+		return nil, fmt.Errorf("transport.request new request error: %v", err)
+	}
+	//build headers
+	req.Header = rb.buildHeaders()
+	return req, nil
 }
 
 //NewHttpTransport create new http transport
@@ -76,36 +103,23 @@ type Transport struct {
 	rb   *RequestBuilder
 }
 
-//Request method
-func (t *Transport) Request(method string, path string, query map[string]interface{}, body map[string]interface{}) (resp *http.Response, err error) {
-	//build uri
-	uri, err := t.rb.buildUri(path, query)
+//SendRequest method
+func (t *Transport) SendRequest(ctx context.Context, method string, path string, query map[string]interface{}, body map[string]interface{}) (resp *http.Response, err error) {
+	req, err := t.rb.BuildRequest(ctx, method, path, query, body)
 	if err != nil {
-		return nil, fmt.Errorf("transport@request build uri: %v", err)
+		return nil, fmt.Errorf("transport.SendRequest: %v", err)
 	}
-	//build body
-	bodyReader, err := t.rb.buildBody(body)
-	if err != nil {
-		return nil, fmt.Errorf("transport@request build request body: %v", err)
-	}
-	//build request
-	req, err := http.NewRequest(strings.ToUpper(method), uri.String(), bodyReader)
-	if err != nil {
-		return nil, fmt.Errorf("transport@request new request error: %v", err)
-	}
-	//build headers
-	req.Header = t.rb.buildHeaders()
 	return t.http.Do(req)
 }
 
 //Get method
-func (t *Transport) Get(path string, query map[string]interface{}) (resp *http.Response, err error) {
-	return t.Request("GET", path, query, nil)
+func (t *Transport) Get(ctx context.Context, path string, query map[string]interface{}) (resp *http.Response, err error) {
+	return t.SendRequest(ctx, http.MethodGet, path, query, nil)
 }
 
 //Post method
-func (t *Transport) Post(path string, body map[string]interface{}, query map[string]interface{}) (resp *http.Response, err error) {
-	return t.Request("POST", path, query, body)
+func (t *Transport) Post(ctx context.Context, path string, body map[string]interface{}, query map[string]interface{}) (resp *http.Response, err error) {
+	return t.SendRequest(ctx, http.MethodPost, path, query, body)
 }
 
 //Response wrapper
