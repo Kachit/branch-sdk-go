@@ -1,5 +1,7 @@
 package branchio
 
+import "fmt"
+
 //Config structure
 type Config struct {
 	AppId  string
@@ -16,4 +18,17 @@ func NewConfig(key string, secret string) *Config {
 		Secret: secret,
 	}
 	return cfg
+}
+
+//IsValid check is valid config parameters
+func (c *Config) IsValid() error {
+	var err error
+	if c.Uri == "" {
+		err = fmt.Errorf(`parameter "uri" is empty`)
+	} else if c.Key == "" {
+		err = fmt.Errorf(`parameter "key" is empty`)
+	} else if c.Secret == "" {
+		err = fmt.Errorf(`parameter "secret" is empty`)
+	}
+	return err
 }

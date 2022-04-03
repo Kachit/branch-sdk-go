@@ -18,6 +18,7 @@ type ResourceAbstract struct {
 func (ra *ResourceAbstract) unmarshalResponse(resp *http.Response, v interface{}) error {
 	defer resp.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	//fmt.Println(string(bodyBytes))
 	if err != nil {
 		return fmt.Errorf("ResourceAbstract.unmarshalResponse read body: %v", err)
 	}

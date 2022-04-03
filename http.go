@@ -176,6 +176,37 @@ func NewResponse(raw *http.Response) *Response {
 	return &Response{raw: raw, csv: &CSV{}}
 }
 
+//ResponseBody struct
+type ResponseBody struct {
+	status int
+	Error  *ResponseBodyError `json:"error,omitempty"`
+}
+
+//ResponseBodyError struct
+type ResponseBodyError struct {
+	Message string `json:"message,omitempty"`
+	Code    int64  `json:"code,omitempty"`
+}
+
+//IsSuccess method
+func (r *ResponseBody) IsSuccess() bool {
+	return r.status < http.StatusMultipleChoices
+}
+
+//GetError method
+func (r *ResponseBody) GetError() string {
+	err := "Unknown error"
+	if r.Error != nil && r.Error.Message != "" {
+		err = r.Error.Message
+	}
+	return err
+}
+
+//IsEmptyObjectResponseData func
+func isEmptyObjectResponseData(data []byte) bool {
+	return data[0] == 123 && data[1] == 125
+}
+
 //UnmarshalJson method
 func UnmarshalJson(data []byte, v interface{}) error {
 	return json.Unmarshal(data, &v)

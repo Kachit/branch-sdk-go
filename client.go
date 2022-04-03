@@ -8,12 +8,16 @@ type Client struct {
 }
 
 //NewClientFromConfig Create new client from config
-func NewClientFromConfig(config *Config, cl *http.Client) *Client {
+func NewClientFromConfig(config *Config, cl *http.Client) (*Client, error) {
+	err := config.IsValid()
+	if err != nil {
+		return nil, err
+	}
 	if cl == nil {
 		cl = &http.Client{}
 	}
 	transport := NewHttpTransport(config, cl)
-	return &Client{transport}
+	return &Client{transport}, nil
 }
 
 //Export resource

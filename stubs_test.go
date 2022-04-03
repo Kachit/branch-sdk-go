@@ -11,8 +11,8 @@ import (
 func BuildStubConfig() *Config {
 	return &Config{
 		Uri:    "https://github.com",
-		Key:    "PublicKey",
-		Secret: "SecretKey",
+		Key:    "Key",
+		Secret: "Secret",
 	}
 }
 
