@@ -170,3 +170,107 @@ func Test_HTTP_ResponseBody_GetErrorNotEmptyMessage(t *testing.T) {
 	rsp := &ResponseBody{Error: &ResponseBodyError{Message: "Foo error"}}
 	assert.Equal(t, "Foo error", rsp.GetError())
 }
+
+func Test_HTTP_NewResponseHandler_ResponseHandlerStream(t *testing.T) {
+	result := NewResponseHandler(ResponseContentTypeOctetStream)
+	assert.Implements(t, (*ResponseHandlerInterface)(nil), result)
+	assert.IsType(t, (*ResponseHandlerStream)(nil), result)
+}
+
+func Test_HTTP_NewResponseHandler_ResponseHandlerJson(t *testing.T) {
+	result := NewResponseHandler(ResponseContentTypeJson)
+	assert.Implements(t, (*ResponseHandlerInterface)(nil), result)
+	assert.IsType(t, (*ResponseHandlerJson)(nil), result)
+}
+
+func Test_HTTP_NewResponseHandler_ByDefault(t *testing.T) {
+	result := NewResponseHandler("foo")
+	assert.Implements(t, (*ResponseHandlerInterface)(nil), result)
+	assert.IsType(t, (*ResponseHandlerJson)(nil), result)
+}
+
+func Test_HTTP_ResponseHandlerStream_UnmarshalBody(t *testing.T) {
+	handler := &ResponseHandlerStream{}
+	reportData, _ := ioutil.ReadFile("stubs/data/export/events/eo_click-v2.csv")
+	events := []*Event{}
+	err := handler.UnmarshalBody(reportData, &events)
+	assert.NoError(t, err)
+	assert.Equal(t, 12345678900, events[0].Id.Value())
+	assert.Equal(t, 1613320668570, events[0].Timestamp.Value())
+	assert.Equal(t, 12345678900, events[0].LastAttributedTouchDataTildeId.Value())
+	assert.Equal(t, false, events[0].DeepLinked.Value())
+	assert.Equal(t, false, events[0].FirstEventForUser.Value())
+	assert.Equal(t, 9876543210, events[0].DiMatchClickToken.Value())
+	assert.Equal(t, float64(0), events[0].EventDataRevenueInUsd.Value())
+	assert.Equal(t, float64(0), events[0].EventDataExchangeRate.Value())
+	assert.Equal(t, 1613320668570, events[0].EventTimestamp.Value())
+}
+
+func Test_HTTP_ResponseHandlerStream_ReadBody(t *testing.T) {
+	handler := &ResponseHandlerStream{}
+	expected, _ := ioutil.ReadFile("stubs/data/export/events/eo_click-v2.csv")
+	resp := buildStubResponseFromGzip(http.StatusOK, "stubs/data/export/events/eo_click-v2.csv")
+	data, err := handler.ReadBody(resp)
+
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, data)
+	assert.Equal(t, expected, data)
+	assert.Empty(t, body)
+}
+
+func Test_HTTP_ResponseHandlerStream_RestoreBody(t *testing.T) {
+	handler := &ResponseHandlerStream{}
+	expected, _ := ioutil.ReadFile("stubs/data/export/events/eo_click-v2.csv")
+	resp := buildStubResponseFromGzip(http.StatusOK, "stubs/data/export/events/eo_click-v2.csv")
+	data, err := handler.ReadBody(resp)
+	closer, err := handler.RestoreBody(data)
+	resp.Body = closer
+
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, data)
+	assert.NotEmpty(t, body)
+	//assert.Equal(t, expected, body)
+}
+
+func Test_HTTP_ResponseHandlerJson_UnmarshalBody(t *testing.T) {
+	handler := &ResponseHandlerJson{}
+	reportData, _ := ioutil.ReadFile("stubs/data/export/ontology/success.full.json")
+	var data EventOntology
+	err := handler.UnmarshalBody(reportData, &data)
+	assert.NoError(t, err)
+	assert.Equal(t, "https://branch-exports-web.foo-bar.amazonaws.com/eo_click.csv", data.Click[0])
+}
+
+func Test_HTTP_ResponseHandlerJson_ReadBody(t *testing.T) {
+	handler := &ResponseHandlerJson{}
+	expected, _ := ioutil.ReadFile("stubs/data/export/ontology/success.full.json")
+	resp := BuildStubResponseFromFile(http.StatusOK, "stubs/data/export/ontology/success.full.json")
+	data, err := handler.ReadBody(resp)
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, data)
+	assert.Equal(t, expected, data)
+	assert.Empty(t, body)
+}
+
+func Test_HTTP_ResponseHandlerJson_RestoreBody(t *testing.T) {
+	handler := &ResponseHandlerJson{}
+	expected, _ := ioutil.ReadFile("stubs/data/export/ontology/success.full.json")
+	resp := BuildStubResponseFromFile(http.StatusOK, "stubs/data/export/ontology/success.full.json")
+	data, _ := handler.ReadBody(resp)
+	closer, err := handler.RestoreBody(data)
+	resp.Body = closer
+
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, data)
+	assert.NotEmpty(t, body)
+	assert.Equal(t, expected, body)
+}

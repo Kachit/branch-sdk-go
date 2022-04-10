@@ -26,7 +26,7 @@ func (ra *ResourceAbstract) unmarshalResponse(resp *http.Response, v interface{}
 		return fmt.Errorf("ResourceAbstract.unmarshalResponse read body: %v", err)
 	}
 	resp.Body = body
-	return responseHandler.UnmarshalBody(bodyBytes, &v)
+	return responseHandler.UnmarshalBody(bodyBytes, v)
 }
 
 //NewResourceAbstract Create new resource abstract
