@@ -37,6 +37,58 @@ func Test_Export_ExportResource_BuildEventOntologyRequestParams(t *testing.T) {
 	assert.Equal(t, "2022-04-07", result["export_date"])
 }
 
+func Test_Export_ExportResource_GetEventOntologySuccess(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	cfg := BuildStubConfig()
+	transport := BuildStubHttpTransport()
+	ar := NewResourceAbstract(transport)
+	resource := &ExportResource{ar}
+
+	rs := BuildStubResponseFromFile(http.StatusOK, "stubs/data/export/ontology/success.full.json")
+	rs.Header.Set("Content-Type", ResponseContentTypeJson)
+	httpmock.RegisterResponder(http.MethodPost, cfg.Uri+"/v3/export", httpmock.ResponderFromResponse(rs))
+
+	ctx := context.Background()
+	dt := time.Date(2022, 4, 07, 0, 0, 0, 0, time.Local)
+	result, resp, err := resource.GetEventOntology(ctx, dt)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp)
+	assert.NotEmpty(t, result)
+	assert.Equal(t, "https://branch-exports-web.foo-bar.amazonaws.com/eo_click.csv", result.Data.Click[0])
+
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	assert.NotEmpty(t, body)
+}
+
+func Test_Export_ExportResource_GetEventOntologyError(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	cfg := BuildStubConfig()
+	transport := BuildStubHttpTransport()
+	ar := NewResourceAbstract(transport)
+	resource := &ExportResource{ar}
+
+	rs := BuildStubResponseFromFile(http.StatusUnauthorized, "stubs/data/export/ontology/error.auth.json")
+	rs.Header.Set("Content-Type", ResponseContentTypeJson)
+	httpmock.RegisterResponder(http.MethodPost, cfg.Uri+"/v3/export", httpmock.ResponderFromResponse(rs))
+
+	ctx := context.Background()
+	dt := time.Date(2022, 4, 07, 0, 0, 0, 0, time.Local)
+	result, resp, err := resource.GetEventOntology(ctx, dt)
+	assert.Error(t, err)
+	assert.NotEmpty(t, resp)
+	assert.NotEmpty(t, result)
+	assert.Equal(t, "Invalid or missing app id, Branch key, or secret", err.Error())
+
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	assert.NotEmpty(t, body)
+}
+
 func Test_Export_ExportResource_GetEventDataSuccess(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
@@ -67,4 +119,24 @@ func Test_Export_ExportResource_GetEventDataSuccess(t *testing.T) {
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 	assert.NotEmpty(t, body)
+}
+
+func Test_Export_ExportResource_GetEventDataError(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	transport := BuildStubHttpTransport()
+	ar := NewResourceAbstract(transport)
+	resource := &ExportResource{ar}
+
+	rs := BuildStubResponseFromFile(http.StatusBadRequest, "stubs/data/export/events/bad-request.html")
+	rs.Header.Set("Content-Type", ResponseContentTypeOctetStream)
+	httpmock.RegisterResponder(http.MethodGet, "https://branch-exports-web.foo-bar.amazonaws.com/eo_click.csv", httpmock.ResponderFromResponse(rs))
+
+	ctx := context.Background()
+	result, resp, err := resource.GetEventData(ctx, "https://branch-exports-web.foo-bar.amazonaws.com/eo_click.csv")
+	assert.Error(t, err)
+	assert.NotEmpty(t, resp)
+	assert.NotEmpty(t, result)
+	assert.Equal(t, "Unknown error", err.Error())
 }

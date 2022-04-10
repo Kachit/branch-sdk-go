@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/kachit/branch-sdk-go/blob/master/LICENSE)
 
 ## Description
-Unofficial Branch.io reports API Client for Go
+Unofficial Branch.io daily exports API Client for Go
 
 ## API documentation
 https://help.branch.io/developers-hub/docs/daily-exports
@@ -39,5 +39,44 @@ func main(){
 ```go
 ctx := context.Background()
 dt := time.Date(2022, 1, 30, 0, 0, 0, 0, time.Local)
-result, response, err := client.Export().GetEventOntology(ctx, dt)
+ontology, response, err := client.Export().GetEventOntology(ctx, dt)
+
+if err != nil {
+    fmt.Printf("Wrong API request " + err.Error())
+    panic(err)
+}
+
+//Dump raw response
+fmt.Println(response)
+
+//Dump result
+fmt.Println(ontology.Data.Install[0])
+fmt.Println(ontology.Data.BranchCtaView[0])
+fmt.Println(ontology.Data.Click[0])
+fmt.Println(ontology.Data.Impression[0])
+fmt.Println(ontology.Data.Open[0])
+```
+
+### Get events data
+```go
+ctx := context.Background()
+events, response, err := client.Export().GetEventData(ctx, ontology.Data.Install[0])
+
+if err != nil {
+    fmt.Printf("Wrong API request " + err.Error())
+    panic(err)
+}
+
+//Dump raw response
+fmt.Println(response)
+
+//Dump result
+fmt.Println(events.Data[0].Id.Value())
+fmt.Println(events.Data[0].Timestamp.Value())
+fmt.Println(events.Data[0].LastAttributedTouchDataTildeId.Value())
+fmt.Println(events.Data[0].DeepLinked.Value())
+fmt.Println(events.Data[0].FirstEventForUser.Value())
+fmt.Println(events.Data[0].DiMatchClickToken.Value())
+fmt.Println(events.Data[0].EventDataRevenueInUsd.Value())
+fmt.Println(events.Data[0].EventTimestamp.Value())
 ```
