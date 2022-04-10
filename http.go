@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gocarina/gocsv"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -174,7 +175,6 @@ func (r *ResponseHandlerJson) RestoreBody(data []byte) (io.ReadCloser, error) {
 }
 
 type ResponseHandlerStream struct {
-	csv *CSV
 }
 
 func (r *ResponseHandlerStream) ReadBody(resp *http.Response) ([]byte, error) {
@@ -188,7 +188,8 @@ func (r *ResponseHandlerStream) ReadBody(resp *http.Response) ([]byte, error) {
 }
 
 func (r *ResponseHandlerStream) UnmarshalBody(data []byte, v interface{}) error {
-	return r.csv.Unmarshal(data, v)
+	rc := NewCSVReader(bytes.NewReader(data))
+	return gocsv.UnmarshalCSV(rc, &v)
 }
 
 func (r *ResponseHandlerStream) RestoreBody(data []byte) (io.ReadCloser, error) {
@@ -215,7 +216,7 @@ func NewResponseHandler(contentType string) ResponseHandlerInterface {
 		handler = &ResponseHandlerJson{}
 		break
 	case ResponseContentTypeOctetStream:
-		handler = &ResponseHandlerStream{csv: &CSV{}}
+		handler = &ResponseHandlerStream{}
 		break
 	}
 	return handler

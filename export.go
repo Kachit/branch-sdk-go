@@ -45,10 +45,8 @@ func (r *EventOntology) IsEmpty() bool {
 //EventResponse struct
 type EventResponse struct {
 	*ResponseBody
-	Data *EventsCollection `json:"data,omitempty"`
+	Data []*Event `json:"data,omitempty"`
 }
-
-type EventsCollection []*Event
 
 //Event common struct
 type Event struct {
@@ -232,12 +230,12 @@ func (r *ExportResource) GetEventData(ctx context.Context, link string) (*EventR
 	result := EventResponse{ResponseBody: &ResponseBody{}}
 	result.status = rsp.StatusCode
 	if result.IsSuccess() {
-		events := EventsCollection{}
+		events := []*Event{}
 		err = r.unmarshalResponse(rsp, &events)
 		if err != nil {
 			return &result, rsp, fmt.Errorf("ExportResource.GetEventData error: %v", err)
 		}
-		result.Data = &events
+		result.Data = events
 	} else {
 		return &result, rsp, fmt.Errorf(result.GetError())
 	}
