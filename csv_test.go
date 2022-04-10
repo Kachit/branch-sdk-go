@@ -14,7 +14,7 @@ func Test_CSV_NewCSVReader(t *testing.T) {
 }
 
 func Test_CSV_UUnmarshalCSVClicksEvents(t *testing.T) {
-	reportData, _ := ioutil.ReadFile("stubs/data/export/events/eo_click-v2.csv")
+	reportData, _ := ioutil.ReadFile("stubs/data/export/events/eo-click-v2.csv")
 	events := []*Event{}
 	_ = UnmarshalCSV(reportData, &events)
 	assert.Equal(t, 12345678900, events[0].Id.Value())
@@ -30,7 +30,7 @@ func Test_CSV_UUnmarshalCSVClicksEvents(t *testing.T) {
 }
 
 func Test_CSV_UnmarshalCSVEcommerceEvents(t *testing.T) {
-	reportData, _ := ioutil.ReadFile("stubs/data/export/events/eo_commerce_event-v2.csv")
+	reportData, _ := ioutil.ReadFile("stubs/data/export/events/eo-commerce-event-v2.csv")
 	events := []*Event{}
 	_ = UnmarshalCSV(reportData, &events)
 	assert.Equal(t, 12345678900, events[0].Id.Value())

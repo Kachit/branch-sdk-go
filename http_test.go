@@ -2,6 +2,7 @@ package branchio
 
 import (
 	"context"
+	"fmt"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -191,7 +192,7 @@ func Test_HTTP_NewResponseHandler_ByDefault(t *testing.T) {
 
 func Test_HTTP_ResponseHandlerStream_UnmarshalBody(t *testing.T) {
 	handler := &ResponseHandlerStream{}
-	reportData, _ := ioutil.ReadFile("stubs/data/export/events/eo_click-v2.csv")
+	reportData, _ := ioutil.ReadFile("stubs/data/export/events/eo-click-v2.csv")
 	events := []*Event{}
 	err := handler.UnmarshalBody(reportData, &events)
 	assert.NoError(t, err)
@@ -208,8 +209,8 @@ func Test_HTTP_ResponseHandlerStream_UnmarshalBody(t *testing.T) {
 
 func Test_HTTP_ResponseHandlerStream_ReadBody(t *testing.T) {
 	handler := &ResponseHandlerStream{}
-	expected, _ := ioutil.ReadFile("stubs/data/export/events/eo_click-v2.csv")
-	resp := buildStubResponseFromGzip(http.StatusOK, "stubs/data/export/events/eo_click-v2.csv")
+	expected, _ := ioutil.ReadFile("stubs/data/export/events/eo-click-v2.csv")
+	resp := buildStubResponseFromGzip(http.StatusOK, "stubs/data/export/events/eo-click-v2.csv")
 	data, err := handler.ReadBody(resp)
 
 	defer resp.Body.Close()
@@ -222,8 +223,9 @@ func Test_HTTP_ResponseHandlerStream_ReadBody(t *testing.T) {
 
 func Test_HTTP_ResponseHandlerStream_RestoreBody(t *testing.T) {
 	handler := &ResponseHandlerStream{}
-	expected, _ := ioutil.ReadFile("stubs/data/export/events/eo_click-v2.csv")
-	resp := buildStubResponseFromGzip(http.StatusOK, "stubs/data/export/events/eo_click-v2.csv")
+	expectedRaw, _ := ioutil.ReadFile("stubs/data/export/events/eo-click-v2.csv")
+	expectedGzipped, _ := loadStubResponseDataGzipped("stubs/data/export/events/eo-click-v2.csv")
+	resp := buildStubResponseFromGzip(http.StatusOK, "stubs/data/export/events/eo-click-v2.csv")
 	data, err := handler.ReadBody(resp)
 	closer, err := handler.RestoreBody(data)
 	resp.Body = closer
@@ -231,9 +233,11 @@ func Test_HTTP_ResponseHandlerStream_RestoreBody(t *testing.T) {
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 	assert.NoError(t, err)
-	assert.Equal(t, expected, data)
+	assert.Equal(t, expectedRaw, data)
 	assert.NotEmpty(t, body)
-	//assert.Equal(t, expected, body)
+	fmt.Println(expectedGzipped)
+	fmt.Println(body)
+	//assert.Equal(t, expectedGzipped, body)
 }
 
 func Test_HTTP_ResponseHandlerJson_UnmarshalBody(t *testing.T) {

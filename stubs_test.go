@@ -26,19 +26,19 @@ func LoadStubResponseData(path string) ([]byte, error) {
 
 func BuildStubResponseFromString(statusCode int, json string) *http.Response {
 	body := ioutil.NopCloser(strings.NewReader(json))
-	return &http.Response{Body: body, StatusCode: statusCode}
+	return &http.Response{Body: body, StatusCode: statusCode, Header: http.Header{}}
 }
 
 func BuildStubResponseFromFile(statusCode int, path string) *http.Response {
 	data, _ := LoadStubResponseData(path)
 	body := ioutil.NopCloser(bytes.NewReader(data))
-	return &http.Response{Body: body, StatusCode: statusCode}
+	return &http.Response{Body: body, StatusCode: statusCode, Header: http.Header{}}
 }
 
 func buildStubResponseFromGzip(statusCode int, path string) *http.Response {
 	data, _ := loadStubResponseDataGzipped(path)
 	body := ioutil.NopCloser(bytes.NewReader(data))
-	return &http.Response{Body: body, StatusCode: statusCode}
+	return &http.Response{Body: body, StatusCode: statusCode, Header: http.Header{}}
 }
 
 func loadStubResponseDataGzipped(path string) ([]byte, error) {

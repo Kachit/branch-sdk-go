@@ -192,10 +192,7 @@ type ExportResource struct {
 
 //GetEventOntology Get events ontology data
 func (r *ExportResource) GetEventOntology(ctx context.Context, date time.Time) (*EventOntologyResponse, *http.Response, error) {
-	post := make(map[string]interface{})
-	post["export_date"] = date.Format("2006-01-02")
-	post["branch_key"] = r.cfg.Key
-	post["branch_secret"] = r.cfg.Secret
+	post := r.buildEventOntologyRequestParams(date)
 	rsp, err := r.tr.Post(ctx, "v3/export", post, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("ExportResource.GetEventOntology error: %v", err)
@@ -240,4 +237,13 @@ func (r *ExportResource) GetEventData(ctx context.Context, link string) (*EventR
 		return &result, rsp, fmt.Errorf(result.GetError())
 	}
 	return &result, rsp, err
+}
+
+//GetEventData Get event data by link
+func (r *ExportResource) buildEventOntologyRequestParams(date time.Time) map[string]interface{} {
+	post := make(map[string]interface{})
+	post["export_date"] = date.Format("2006-01-02")
+	post["branch_key"] = r.cfg.Key
+	post["branch_secret"] = r.cfg.Secret
+	return post
 }
