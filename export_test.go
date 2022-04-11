@@ -129,7 +129,7 @@ func Test_Export_ExportResource_GetEventDataError(t *testing.T) {
 	ar := NewResourceAbstract(transport)
 	resource := &ExportResource{ar}
 
-	rs := BuildStubResponseFromFile(http.StatusBadRequest, "stubs/data/export/events/bad-request.html")
+	rs := BuildStubResponseFromFile(http.StatusForbidden, "stubs/data/export/events/forbidden.xml")
 	rs.Header.Set("Content-Type", ResponseContentTypeOctetStream)
 	httpmock.RegisterResponder(http.MethodGet, "https://branch-exports-web.foo-bar.amazonaws.com/eo_click.csv", httpmock.ResponderFromResponse(rs))
 

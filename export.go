@@ -183,6 +183,18 @@ type Event struct {
 	UserDataBuild                                      string          `csv:"user_data_build" json:"user_data_build"`
 	UserDataInternetConnectionType                     string          `csv:"user_data_internet_connection_type" json:"user_data_internet_connection_type"`
 	HashVersion                                        string          `csv:"hash_version" json:"hash_version"`
+	UserDataOptedIn                                    CustomBoolean   `csv:"user_data_opted_in" json:"user_data_opted_in"`
+	DaysFromInstallToOptIn                             string          `csv:"days_from_install_to_opt_in" json:"days_from_install_to_opt_in"`
+	RequestId                                          string          `csv:"request_id" json:"request_id"`
+	LastAttributedTouchDataTildeKeywordMatchType       string          `csv:"last_attributed_touch_data_tilde_keyword_match_type" json:"last_attributed_touch_data_tilde_keyword_match_type"`
+}
+
+//EventError struct
+type EventError struct {
+	Code      string `xml:"Code"`
+	Message   string `xml:"Message"`
+	RequestId string `xml:"RequestId"`
+	HostId    string `xml:"HostId"`
 }
 
 //ExportResource resource wrapper
