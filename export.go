@@ -50,14 +50,14 @@ type EventResponse struct {
 
 //Event common struct
 type Event struct {
-	Id                                                 CustomInteger   `csv:"id" json:"id"`
+	Id                                                 string          `csv:"id" json:"id"`
 	Name                                               string          `csv:"name" json:"name"`
 	Timestamp                                          CustomInteger   `csv:"timestamp" json:"timestamp"`
 	TimestampISO                                       CustomTimestamp `csv:"timestamp_iso" json:"timestamp_iso"`
 	Origin                                             string          `csv:"origin" json:"origin"`
 	LastAttributedTouchType                            string          `csv:"last_attributed_touch_type" json:"last_attributed_touch_type"`
-	LastAttributedTouchTimestamp                       string          `csv:"last_attributed_touch_timestamp" json:"last_attributed_touch_timestamp"`
-	LastAttributedTouchTimestampIso                    string          `csv:"last_attributed_touch_timestamp_iso" json:"last_attributed_touch_timestamp_iso"`
+	LastAttributedTouchTimestamp                       CustomInteger   `csv:"last_attributed_touch_timestamp" json:"last_attributed_touch_timestamp"`
+	LastAttributedTouchTimestampIso                    CustomTimestamp `csv:"last_attributed_touch_timestamp_iso" json:"last_attributed_touch_timestamp_iso"`
 	LastAttributedTouchDataTildeId                     CustomInteger   `csv:"last_attributed_touch_data_tilde_id" json:"last_attributed_touch_data_tilde_id"`
 	LastAttributedTouchDataTildeCampaign               string          `csv:"last_attributed_touch_data_tilde_campaign" json:"last_attributed_touch_data_tilde_campaign"`
 	LastAttributedTouchDataTildeCampaignId             string          `csv:"last_attributed_touch_data_tilde_campaign_id" json:"last_attributed_touch_data_tilde_campaign_id"`
@@ -90,12 +90,12 @@ type Event struct {
 	LastAttributedTouchDataDollar3P                    string          `csv:"last_attributed_touch_data_dollar_3p" json:"last_attributed_touch_data_dollar_3p"`
 	LastAttributedTouchDataPlusWebFormat               string          `csv:"last_attributed_touch_data_plus_web_format" json:"last_attributed_touch_data_plus_web_format"`
 	LastAttributedTouchDataCustomFields                string          `csv:"last_attributed_touch_data_custom_fields" json:"last_attributed_touch_data_custom_fields"`
-	DaysFromLastAttributedTouchToEvent                 string          `csv:"days_from_last_attributed_touch_to_event" json:"days_from_last_attributed_touch_to_event"`
+	DaysFromLastAttributedTouchToEvent                 CustomInteger   `csv:"days_from_last_attributed_touch_to_event" json:"days_from_last_attributed_touch_to_event"`
 	HoursFromLastAttributedTouchToEvent                string          `csv:"hours_from_last_attributed_touch_to_event" json:"hours_from_last_attributed_touch_to_event"`
 	MinutesFromLastAttributedTouchToEvent              string          `csv:"minutes_from_last_attributed_touch_to_event" json:"minutes_from_last_attributed_touch_to_event"`
 	SecondsFromLastAttributedTouchToEvent              string          `csv:"seconds_from_last_attributed_touch_to_event" json:"seconds_from_last_attributed_touch_to_event"`
-	LastCtaViewTimestamp                               string          `csv:"last_cta_view_timestamp" json:"last_cta_view_timestamp"`
-	LastCtaViewTimestampIso                            string          `csv:"last_cta_view_timestamp_iso" json:"last_cta_view_timestamp_iso"`
+	LastCtaViewTimestamp                               CustomInteger   `csv:"last_cta_view_timestamp" json:"last_cta_view_timestamp"`
+	LastCtaViewTimestampIso                            CustomTimestamp `csv:"last_cta_view_timestamp_iso" json:"last_cta_view_timestamp_iso"`
 	LastCtaViewDataTildeId                             string          `csv:"last_cta_view_data_tilde_id" json:"last_cta_view_data_tilde_id"`
 	LastCtaViewDataTildeCampaign                       string          `csv:"last_cta_view_data_tilde_campaign" json:"last_cta_view_data_tilde_campaign"`
 	LastCtaViewDataTildeCampaignId                     string          `csv:"last_cta_view_data_tilde_campaign_id" json:"last_cta_view_data_tilde_campaign_id"`
@@ -184,7 +184,7 @@ type Event struct {
 	UserDataInternetConnectionType                     string          `csv:"user_data_internet_connection_type" json:"user_data_internet_connection_type"`
 	HashVersion                                        string          `csv:"hash_version" json:"hash_version"`
 	UserDataOptedIn                                    CustomBoolean   `csv:"user_data_opted_in" json:"user_data_opted_in"`
-	DaysFromInstallToOptIn                             string          `csv:"days_from_install_to_opt_in" json:"days_from_install_to_opt_in"`
+	DaysFromInstallToOptIn                             CustomInteger   `csv:"days_from_install_to_opt_in" json:"days_from_install_to_opt_in"`
 	RequestId                                          string          `csv:"request_id" json:"request_id"`
 	LastAttributedTouchDataTildeKeywordMatchType       string          `csv:"last_attributed_touch_data_tilde_keyword_match_type" json:"last_attributed_touch_data_tilde_keyword_match_type"`
 }

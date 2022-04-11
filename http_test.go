@@ -196,7 +196,7 @@ func Test_HTTP_ResponseHandlerStream_UnmarshalBody(t *testing.T) {
 	events := []*Event{}
 	err := handler.UnmarshalBody(reportData, &events)
 	assert.NoError(t, err)
-	assert.Equal(t, 12345678900, events[0].Id.Value())
+	assert.Equal(t, "12345678900", events[0].Id)
 	assert.Equal(t, 1613320668570, events[0].Timestamp.Value())
 	assert.Equal(t, 12345678900, events[0].LastAttributedTouchDataTildeId.Value())
 	assert.Equal(t, false, events[0].DeepLinked.Value())

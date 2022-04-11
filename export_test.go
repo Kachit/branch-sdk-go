@@ -2,6 +2,7 @@ package branchio
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -22,6 +23,16 @@ func Test_Export_EventOntology_IsEmpty(t *testing.T) {
 	assert.True(t, r.IsEmpty())
 	r.Click = []string{"foo"}
 	assert.False(t, r.IsEmpty())
+}
+
+func Test_Export_Event_MarshalJSON(t *testing.T) {
+	csvData, _ := ioutil.ReadFile("stubs/data/export/events/eo-click-v2.csv")
+	expectedJsonData, _ := ioutil.ReadFile("stubs/data/export/events/eo-click-v2.json")
+	events := []*Event{}
+	_ = UnmarshalCSV(csvData, &events)
+	jsonData, err := json.Marshal(&events)
+	assert.NoError(t, err)
+	assert.Equal(t, expectedJsonData, jsonData)
 }
 
 func Test_Export_ExportResource_BuildEventOntologyRequestParams(t *testing.T) {
@@ -106,7 +117,7 @@ func Test_Export_ExportResource_GetEventDataSuccess(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, resp)
 	assert.NotEmpty(t, result)
-	assert.Equal(t, 12345678900, result.Data[0].Id.Value())
+	assert.Equal(t, "12345678900", result.Data[0].Id)
 	assert.Equal(t, 1613320668570, result.Data[0].Timestamp.Value())
 	assert.Equal(t, 12345678900, result.Data[0].LastAttributedTouchDataTildeId.Value())
 	assert.Equal(t, false, result.Data[0].DeepLinked.Value())

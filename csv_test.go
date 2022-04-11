@@ -17,7 +17,7 @@ func Test_CSV_UUnmarshalCSVClicksEvents(t *testing.T) {
 	reportData, _ := ioutil.ReadFile("stubs/data/export/events/eo-click-v2.csv")
 	events := []*Event{}
 	_ = UnmarshalCSV(reportData, &events)
-	assert.Equal(t, 12345678900, events[0].Id.Value())
+	assert.Equal(t, "12345678900", events[0].Id)
 	assert.Equal(t, 1613320668570, events[0].Timestamp.Value())
 	assert.Equal(t, 12345678900, events[0].LastAttributedTouchDataTildeId.Value())
 	assert.Equal(t, false, events[0].DeepLinked.Value())
@@ -33,7 +33,7 @@ func Test_CSV_UnmarshalCSVEcommerceEvents(t *testing.T) {
 	reportData, _ := ioutil.ReadFile("stubs/data/export/events/eo-commerce-event-v2.csv")
 	events := []*Event{}
 	_ = UnmarshalCSV(reportData, &events)
-	assert.Equal(t, 12345678900, events[0].Id.Value())
+	assert.Equal(t, "12345678900", events[0].Id)
 	assert.Equal(t, 1613264412028, events[0].Timestamp.Value())
 	assert.Equal(t, 0, events[0].LastAttributedTouchDataTildeId.Value())
 	assert.Equal(t, false, events[0].DeepLinked.Value())
