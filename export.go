@@ -246,6 +246,14 @@ func (r *ExportResource) GetEventData(ctx context.Context, link string) (*EventR
 		}
 		result.Data = events
 	} else {
+		var eventError EventError
+		err = r.unmarshalResponse(rsp, &eventError)
+		if err != nil {
+			return &result, rsp, fmt.Errorf("ExportResource.GetEventData error: %v", err)
+		}
+		respError := &ResponseBodyError{}
+		respError.Message = eventError.Message
+		result.Error = respError
 		return &result, rsp, fmt.Errorf(result.GetError())
 	}
 	return &result, rsp, err

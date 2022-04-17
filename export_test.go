@@ -141,7 +141,7 @@ func Test_Export_ExportResource_GetEventDataError(t *testing.T) {
 	resource := &ExportResource{ar}
 
 	rs := BuildStubResponseFromFile(http.StatusForbidden, "stubs/data/export/events/forbidden.xml")
-	rs.Header.Set("Content-Type", ResponseContentTypeOctetStream)
+	rs.Header.Set("Content-Type", ResponseContentTypeXml)
 	httpmock.RegisterResponder(http.MethodGet, "https://branch-exports-web.foo-bar.amazonaws.com/eo_click.csv", httpmock.ResponderFromResponse(rs))
 
 	ctx := context.Background()
@@ -149,5 +149,5 @@ func Test_Export_ExportResource_GetEventDataError(t *testing.T) {
 	assert.Error(t, err)
 	assert.NotEmpty(t, resp)
 	assert.NotEmpty(t, result)
-	assert.Equal(t, "Unknown error", err.Error())
+	assert.Equal(t, "Access Denied", err.Error())
 }

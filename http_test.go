@@ -184,6 +184,12 @@ func Test_HTTP_NewResponseHandler_ResponseHandlerJson(t *testing.T) {
 	assert.IsType(t, (*ResponseHandlerJson)(nil), result)
 }
 
+func Test_HTTP_NewResponseHandler_ResponseHandlerXml(t *testing.T) {
+	result := NewResponseHandler(ResponseContentTypeXml)
+	assert.Implements(t, (*ResponseHandlerInterface)(nil), result)
+	assert.IsType(t, (*ResponseHandlerXml)(nil), result)
+}
+
 func Test_HTTP_NewResponseHandler_ByDefault(t *testing.T) {
 	result := NewResponseHandler("foo")
 	assert.Implements(t, (*ResponseHandlerInterface)(nil), result)
@@ -267,6 +273,48 @@ func Test_HTTP_ResponseHandlerJson_RestoreBody(t *testing.T) {
 	handler := &ResponseHandlerJson{}
 	expected, _ := ioutil.ReadFile("stubs/data/export/ontology/success.full.json")
 	resp := BuildStubResponseFromFile(http.StatusOK, "stubs/data/export/ontology/success.full.json")
+	data, _ := handler.ReadBody(resp)
+	closer, err := handler.RestoreBody(data)
+	resp.Body = closer
+
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, data)
+	assert.NotEmpty(t, body)
+	assert.Equal(t, expected, body)
+}
+
+func Test_HTTP_ResponseHandlerXml_ReadBody(t *testing.T) {
+	handler := &ResponseHandlerXml{}
+	expected, _ := ioutil.ReadFile("stubs/data/export/events/forbidden.xml")
+	resp := BuildStubResponseFromFile(http.StatusOK, "stubs/data/export/events/forbidden.xml")
+	data, err := handler.ReadBody(resp)
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, data)
+	assert.Equal(t, expected, data)
+	assert.Empty(t, body)
+}
+
+func Test_HTTP_ResponseHandlerXml_UnmarshalBody(t *testing.T) {
+	handler := &ResponseHandlerXml{}
+	reportData, _ := ioutil.ReadFile("stubs/data/export/events/forbidden.xml")
+	var result EventError
+	err := handler.UnmarshalBody(reportData, &result)
+	assert.NoError(t, err)
+	assert.Equal(t, "AccessDenied", result.Code)
+	assert.Equal(t, "Access Denied", result.Message)
+	assert.Equal(t, "QWERTY", result.RequestId)
+	assert.Equal(t, "qwerty=", result.HostId)
+}
+
+func Test_HTTP_ResponseHandlerXml_RestoreBody(t *testing.T) {
+	handler := &ResponseHandlerXml{}
+	expected, _ := ioutil.ReadFile("stubs/data/export/events/forbidden.xml")
+	resp := BuildStubResponseFromFile(http.StatusOK, "stubs/data/export/events/forbidden.xml")
 	data, _ := handler.ReadBody(resp)
 	closer, err := handler.RestoreBody(data)
 	resp.Body = closer

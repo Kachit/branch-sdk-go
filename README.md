@@ -71,7 +71,7 @@ if err != nil {
 fmt.Println(response)
 
 //Dump result
-fmt.Println(events.Data[0].Id.Value())
+fmt.Println(events.Data[0].Id)
 fmt.Println(events.Data[0].Timestamp.Value())
 fmt.Println(events.Data[0].LastAttributedTouchDataTildeId.Value())
 fmt.Println(events.Data[0].DeepLinked.Value())

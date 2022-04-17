@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -14,6 +15,7 @@ import (
 )
 
 const ResponseContentTypeJson = "application/json; charset=utf-8"
+const ResponseContentTypeXml = "application/xml"
 const ResponseContentTypeOctetStream = "application/octet-stream"
 
 //NewDefaultHttpClient create new http client
@@ -173,6 +175,22 @@ func (r *ResponseHandlerJson) RestoreBody(data []byte) (io.ReadCloser, error) {
 	return ioutil.NopCloser(bytes.NewBuffer(data)), nil
 }
 
+type ResponseHandlerXml struct {
+}
+
+func (r *ResponseHandlerXml) ReadBody(resp *http.Response) ([]byte, error) {
+	defer resp.Body.Close()
+	return ioutil.ReadAll(resp.Body)
+}
+
+func (r *ResponseHandlerXml) UnmarshalBody(data []byte, v interface{}) error {
+	return xml.Unmarshal(data, &v)
+}
+
+func (r *ResponseHandlerXml) RestoreBody(data []byte) (io.ReadCloser, error) {
+	return ioutil.NopCloser(bytes.NewBuffer(data)), nil
+}
+
 type ResponseHandlerStream struct {
 }
 
@@ -215,6 +233,9 @@ func NewResponseHandler(contentType string) ResponseHandlerInterface {
 		break
 	case ResponseContentTypeJson:
 		handler = &ResponseHandlerJson{}
+		break
+	case ResponseContentTypeXml:
+		handler = &ResponseHandlerXml{}
 		break
 	default:
 		handler = &ResponseHandlerJson{}
