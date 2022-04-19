@@ -1,4 +1,4 @@
-module github.com/kachit/branch-sdk-go
+module github.com/kachit/branch-sdk-go/v1
 
 go 1.13
 
