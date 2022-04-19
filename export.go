@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"reflect"
 	"time"
 )
 
@@ -39,7 +40,16 @@ type EventOntology struct {
 
 //IsEmpty method
 func (r *EventOntology) IsEmpty() bool {
-	return len(r.Click) == 0
+	result := true
+	v := reflect.ValueOf(*r)
+	for i := 0; i < v.NumField(); i++ {
+		prop := v.Field(i).Interface().([]string)
+		if len(prop) > 0 {
+			result = false
+			break
+		}
+	}
+	return result
 }
 
 //EventResponse struct
