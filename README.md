@@ -2,6 +2,7 @@
 [![Build Status](https://app.travis-ci.com/Kachit/branch-sdk-go.svg?branch=master)](https://app.travis-ci.com/github/Kachit/branch-sdk-go)
 [![Codecov](https://codecov.io/gh/Kachit/branch-sdk-go/branch/master/graph/badge.svg)](https://codecov.io/gh/Kachit/branch-sdk-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kachit/branch-sdk-go)](https://goreportcard.com/report/github.com/kachit/branch-sdk-go)
+[![Version](https://img.shields.io/github/go-mod/go-version/Kachit/branch-sdk-go)](https://go.dev/doc/go1.13)
 [![Release](https://img.shields.io/github/v/release/Kachit/branch-sdk-go.svg)](https://github.com/Kachit/branch-sdk-go/releases)
 [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/kachit/branch-sdk-go/blob/master/LICENSE)
 
