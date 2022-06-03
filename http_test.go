@@ -2,327 +2,366 @@ package branchio
 
 import (
 	"context"
-	"fmt"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"net/http"
 	"testing"
 )
 
-func Test_HTTP_RequestBuilder_BuildUriWithoutQueryParams(t *testing.T) {
-	cfg := BuildStubConfig()
-	builder := RequestBuilder{cfg: cfg}
-	uri, err := builder.buildUri("qwerty", nil)
-	assert.Nil(t, err)
-	assert.NotEmpty(t, uri)
-	assert.Equal(t, ProdAPIUrl+"/qwerty", uri.String())
+type HttpRequestBuilderTestSuite struct {
+	suite.Suite
+	cfg      *Config
+	ctx      context.Context
+	testable *RequestBuilder
 }
 
-func Test_HTTP_RequestBuilder_BuildUriWithQueryParams(t *testing.T) {
-	cfg := BuildStubConfig()
-	builder := RequestBuilder{cfg: cfg}
+func (suite *HttpRequestBuilderTestSuite) SetupTest() {
+	suite.cfg = BuildStubConfig()
+	suite.ctx = context.Background()
+	suite.testable = &RequestBuilder{cfg: suite.cfg}
+}
 
+func (suite *HttpRequestBuilderTestSuite) TestBuildUriWithoutQueryParams() {
+	uri, err := suite.testable.buildUri("qwerty", nil)
+	assert.Nil(suite.T(), err)
+	assert.NotEmpty(suite.T(), uri)
+	assert.Equal(suite.T(), ProdAPIUrl+"/qwerty", uri.String())
+}
+
+func (suite *HttpRequestBuilderTestSuite) TestBuildUriWithQueryParams() {
 	data := make(map[string]interface{})
 	data["foo"] = "bar"
 	data["bar"] = "baz"
 
-	uri, err := builder.buildUri("qwerty", data)
-	assert.Nil(t, err)
-	assert.NotEmpty(t, uri)
-	assert.Equal(t, ProdAPIUrl+"/qwerty?bar=baz&foo=bar", uri.String())
+	uri, err := suite.testable.buildUri("qwerty", data)
+	assert.Nil(suite.T(), err)
+	assert.NotEmpty(suite.T(), uri)
+	assert.Equal(suite.T(), ProdAPIUrl+"/qwerty?bar=baz&foo=bar", uri.String())
 }
 
-func Test_HTTP_RequestBuilder_BuildHeaders(t *testing.T) {
-	cfg := BuildStubConfig()
-	builder := RequestBuilder{cfg: cfg}
-
-	headers := builder.buildHeaders()
-	assert.NotEmpty(t, headers)
-	assert.Equal(t, "application/json", headers.Get("Content-Type"))
+func (suite *HttpRequestBuilderTestSuite) TestBuildHeaders() {
+	headers := suite.testable.buildHeaders()
+	assert.NotEmpty(suite.T(), headers)
+	assert.Equal(suite.T(), "application/json", headers.Get("Content-Type"))
 }
 
-func Test_HTTP_RequestBuilder_BuildBody(t *testing.T) {
-	cfg := BuildStubConfig()
-	builder := RequestBuilder{cfg: cfg}
-
+func (suite *HttpRequestBuilderTestSuite) TestBuildBody() {
 	data := make(map[string]interface{})
 	data["foo"] = "bar"
 	data["bar"] = "baz"
 
-	body, _ := builder.buildBody(data)
-	assert.NotEmpty(t, body)
+	body, _ := suite.testable.buildBody(data)
+	assert.NotEmpty(suite.T(), body)
 }
 
-func Test_HTTP_RequestBuilder_BuildRequestGET(t *testing.T) {
-	cfg := BuildStubConfig()
-	builder := RequestBuilder{cfg: cfg}
-
-	ctx := context.Background()
-	result, err := builder.BuildRequest(ctx, "get", "foo", map[string]interface{}{"foo": "bar"}, map[string]interface{}{"foo": "bar"})
-	assert.NoError(t, err)
-	assert.Equal(t, http.MethodGet, result.Method)
-	assert.Equal(t, ProdAPIUrl+"/foo?foo=bar", result.URL.String())
-	assert.Equal(t, "application/json", result.Header.Get("Content-Type"))
-	assert.Nil(t, result.Body)
+func (suite *HttpRequestBuilderTestSuite) TestBuildRequestGET() {
+	result, err := suite.testable.BuildRequest(suite.ctx, "get", "foo", map[string]interface{}{"foo": "bar"}, map[string]interface{}{"foo": "bar"})
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.MethodGet, result.Method)
+	assert.Equal(suite.T(), ProdAPIUrl+"/foo?foo=bar", result.URL.String())
+	assert.Equal(suite.T(), "application/json", result.Header.Get("Content-Type"))
+	assert.Nil(suite.T(), result.Body)
 }
 
-func Test_HTTP_RequestBuilder_BuildRequestPOST(t *testing.T) {
-	cfg := BuildStubConfig()
-	builder := RequestBuilder{cfg: cfg}
-
-	ctx := context.Background()
-	result, err := builder.BuildRequest(ctx, "post", "foo", map[string]interface{}{"foo": "bar"}, map[string]interface{}{"foo": "bar"})
-	assert.NoError(t, err)
-	assert.Equal(t, http.MethodPost, result.Method)
-	assert.Equal(t, ProdAPIUrl+"/foo?foo=bar", result.URL.String())
-	assert.Equal(t, "application/json", result.Header.Get("Content-Type"))
-	assert.NotEmpty(t, result.Body)
+func (suite *HttpRequestBuilderTestSuite) TestBuildRequestPOST() {
+	result, err := suite.testable.BuildRequest(suite.ctx, "post", "foo", map[string]interface{}{"foo": "bar"}, map[string]interface{}{"foo": "bar"})
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.MethodPost, result.Method)
+	assert.Equal(suite.T(), ProdAPIUrl+"/foo?foo=bar", result.URL.String())
+	assert.Equal(suite.T(), "application/json", result.Header.Get("Content-Type"))
+	assert.NotEmpty(suite.T(), result.Body)
 }
 
-func Test_HTTP_NewHttpTransport(t *testing.T) {
-	cfg := BuildStubConfig()
-	transport := NewHttpTransport(cfg, nil)
-	assert.NotEmpty(t, transport)
+func TestHttpRequestBuilderTestSuite(t *testing.T) {
+	suite.Run(t, new(HttpRequestBuilderTestSuite))
 }
 
-func Test_HTTP_Transport_SendRequestSuccess(t *testing.T) {
+type HttpTransportTestSuite struct {
+	suite.Suite
+	cfg      *Config
+	ctx      context.Context
+	testable *Transport
+}
+
+func (suite *HttpTransportTestSuite) SetupTest() {
+	suite.cfg = BuildStubConfig()
+	suite.ctx = context.Background()
+	suite.testable = BuildStubHttpTransport()
 	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
+}
 
-	cfg := BuildStubConfig()
-	transport := BuildStubHttpTransport()
+func (suite *HttpTransportTestSuite) TearDownTest() {
+	httpmock.DeactivateAndReset()
+}
 
+func (suite *HttpTransportTestSuite) TestSendRequestSuccess() {
 	body, _ := LoadStubResponseData("stubs/data/export/ontology/success.empty.json")
-	httpmock.RegisterResponder(http.MethodGet, cfg.Uri+"/foo", httpmock.NewBytesResponder(http.StatusOK, body))
+	httpmock.RegisterResponder(http.MethodGet, suite.cfg.Uri+"/foo", httpmock.NewBytesResponder(http.StatusOK, body))
 
-	ctx := context.Background()
-	resp, err := transport.SendRequest(ctx, http.MethodGet, "foo", nil, nil)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, resp)
+	resp, err := suite.testable.SendRequest(suite.ctx, http.MethodGet, "foo", nil, nil)
+	assert.NoError(suite.T(), err)
+	assert.NotEmpty(suite.T(), resp)
 
 	defer resp.Body.Close()
 	bodyRsp, _ := ioutil.ReadAll(resp.Body)
-	assert.Equal(t, body, bodyRsp)
+	assert.Equal(suite.T(), body, bodyRsp)
 }
 
-func Test_HTTP_Transport_SendRequestGET(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-
-	cfg := BuildStubConfig()
-	transport := BuildStubHttpTransport()
-
+func (suite *HttpTransportTestSuite) TestSendRequestGET() {
 	body, _ := LoadStubResponseData("stubs/data/export/ontology/success.empty.json")
 
-	httpmock.RegisterResponder(http.MethodGet, cfg.Uri+"/foo", httpmock.NewBytesResponder(http.StatusOK, body))
+	httpmock.RegisterResponder(http.MethodGet, suite.cfg.Uri+"/foo", httpmock.NewBytesResponder(http.StatusOK, body))
 
-	ctx := context.Background()
-	resp, err := transport.Get(ctx, "foo", nil)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, resp)
+	resp, err := suite.testable.Get(suite.ctx, "foo", nil)
+	assert.NoError(suite.T(), err)
+	assert.NotEmpty(suite.T(), resp)
 
 	defer resp.Body.Close()
 	bodyRsp, _ := ioutil.ReadAll(resp.Body)
-	assert.Equal(t, body, bodyRsp)
+	assert.Equal(suite.T(), body, bodyRsp)
 }
 
-func Test_HTTP_Transport_SendRequestPOST(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-
-	cfg := BuildStubConfig()
-	transport := BuildStubHttpTransport()
-
+func (suite *HttpTransportTestSuite) TestSendRequestPOST() {
 	body, _ := LoadStubResponseData("stubs/data/export/ontology/success.empty.json")
 
-	httpmock.RegisterResponder(http.MethodPost, cfg.Uri+"/foo", httpmock.NewBytesResponder(http.StatusOK, body))
+	httpmock.RegisterResponder(http.MethodPost, suite.cfg.Uri+"/foo", httpmock.NewBytesResponder(http.StatusOK, body))
 
-	ctx := context.Background()
-	resp, err := transport.Post(ctx, "foo", nil, nil)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, resp)
+	resp, err := suite.testable.Post(suite.ctx, "foo", nil, nil)
+	assert.NoError(suite.T(), err)
+	assert.NotEmpty(suite.T(), resp)
 
 	defer resp.Body.Close()
 	bodyRsp, _ := ioutil.ReadAll(resp.Body)
-	assert.Equal(t, body, bodyRsp)
+	assert.Equal(suite.T(), body, bodyRsp)
 }
 
-func Test_HTTP_ResponseBody_IsSuccess(t *testing.T) {
+func TestHttpTransportTestSuite(t *testing.T) {
+	suite.Run(t, new(HttpTransportTestSuite))
+}
+
+type HttpResponseBodyTestSuite struct {
+	suite.Suite
+}
+
+func (suite *HttpResponseBodyTestSuite) TestIsSuccess() {
 	rsp := &ResponseBody{status: http.StatusAccepted}
-	assert.True(t, rsp.IsSuccess())
+	assert.True(suite.T(), rsp.IsSuccess())
 	rsp.status = http.StatusMultipleChoices
-	assert.False(t, rsp.IsSuccess())
+	assert.False(suite.T(), rsp.IsSuccess())
 	rsp.status = http.StatusBadRequest
-	assert.False(t, rsp.IsSuccess())
+	assert.False(suite.T(), rsp.IsSuccess())
 }
 
-func Test_HTTP_ResponseBody_GetErrorByDefault(t *testing.T) {
+func (suite *HttpResponseBodyTestSuite) TestGetErrorByDefault() {
 	rsp := &ResponseBody{}
-	assert.Equal(t, "Unknown error", rsp.GetError())
+	assert.Equal(suite.T(), "Unknown error", rsp.GetError())
 }
 
-func Test_HTTP_ResponseBody_GetErrorEmptyMessage(t *testing.T) {
+func (suite *HttpResponseBodyTestSuite) TestGetErrorEmptyMessage() {
 	rsp := &ResponseBody{Error: &ResponseBodyError{}}
-	assert.Equal(t, "Unknown error", rsp.GetError())
+	assert.Equal(suite.T(), "Unknown error", rsp.GetError())
 }
 
-func Test_HTTP_ResponseBody_GetErrorNotEmptyMessage(t *testing.T) {
+func (suite *HttpResponseBodyTestSuite) TestGetErrorNotEmptyMessage() {
 	rsp := &ResponseBody{Error: &ResponseBodyError{Message: "Foo error"}}
-	assert.Equal(t, "Foo error", rsp.GetError())
+	assert.Equal(suite.T(), "Foo error", rsp.GetError())
 }
 
-func Test_HTTP_NewResponseHandler_ResponseHandlerStream(t *testing.T) {
+func TestHttpResponseBodyTestSuite(t *testing.T) {
+	suite.Run(t, new(HttpResponseBodyTestSuite))
+}
+
+type HttpNewResponseHandlerTestSuite struct {
+	suite.Suite
+}
+
+func (suite *HttpNewResponseHandlerTestSuite) TestNewResponseHandlerStream() {
 	result := NewResponseHandler(ResponseContentTypeOctetStream)
-	assert.Implements(t, (*ResponseHandlerInterface)(nil), result)
-	assert.IsType(t, (*ResponseHandlerStream)(nil), result)
+	assert.Implements(suite.T(), (*ResponseHandlerInterface)(nil), result)
+	assert.IsType(suite.T(), (*ResponseHandlerStream)(nil), result)
 }
 
-func Test_HTTP_NewResponseHandler_ResponseHandlerJson(t *testing.T) {
+func (suite *HttpNewResponseHandlerTestSuite) TestNewResponseHandlerJson() {
 	result := NewResponseHandler(ResponseContentTypeJson)
-	assert.Implements(t, (*ResponseHandlerInterface)(nil), result)
-	assert.IsType(t, (*ResponseHandlerJson)(nil), result)
+	assert.Implements(suite.T(), (*ResponseHandlerInterface)(nil), result)
+	assert.IsType(suite.T(), (*ResponseHandlerJson)(nil), result)
 }
 
-func Test_HTTP_NewResponseHandler_ResponseHandlerXml(t *testing.T) {
+func (suite *HttpNewResponseHandlerTestSuite) TestNewResponseHandlerXml() {
 	result := NewResponseHandler(ResponseContentTypeXml)
-	assert.Implements(t, (*ResponseHandlerInterface)(nil), result)
-	assert.IsType(t, (*ResponseHandlerXml)(nil), result)
+	assert.Implements(suite.T(), (*ResponseHandlerInterface)(nil), result)
+	assert.IsType(suite.T(), (*ResponseHandlerXml)(nil), result)
 }
 
-func Test_HTTP_NewResponseHandler_ByDefault(t *testing.T) {
+func (suite *HttpNewResponseHandlerTestSuite) TestNewHandlerByDefault() {
 	result := NewResponseHandler("foo")
-	assert.Implements(t, (*ResponseHandlerInterface)(nil), result)
-	assert.IsType(t, (*ResponseHandlerJson)(nil), result)
+	assert.Implements(suite.T(), (*ResponseHandlerInterface)(nil), result)
+	assert.IsType(suite.T(), (*ResponseHandlerJson)(nil), result)
 }
 
-func Test_HTTP_ResponseHandlerStream_UnmarshalBody(t *testing.T) {
-	handler := &ResponseHandlerStream{}
+func TestHttpNewResponseHandlerTestSuite(t *testing.T) {
+	suite.Run(t, new(HttpNewResponseHandlerTestSuite))
+}
+
+type HttpResponseHandlerStreamTestSuite struct {
+	suite.Suite
+	testable *ResponseHandlerStream
+}
+
+func (suite *HttpResponseHandlerStreamTestSuite) SetupTest() {
+	suite.testable = &ResponseHandlerStream{}
+}
+
+func (suite *HttpResponseHandlerStreamTestSuite) TestUnmarshalBody() {
 	reportData, _ := ioutil.ReadFile("stubs/data/export/events/eo-click-v2.csv")
 	events := []*Event{}
-	err := handler.UnmarshalBody(reportData, &events)
-	assert.NoError(t, err)
-	assert.Equal(t, "12345678900", events[0].Id)
-	assert.Equal(t, 1613320668570, events[0].Timestamp.Value())
-	assert.Equal(t, 12345678900, events[0].LastAttributedTouchDataTildeId.Value())
-	assert.Equal(t, false, events[0].DeepLinked.Value())
-	assert.Equal(t, false, events[0].FirstEventForUser.Value())
-	assert.Equal(t, 9876543210, events[0].DiMatchClickToken.Value())
-	assert.Equal(t, float64(0), events[0].EventDataRevenueInUsd.Value())
-	assert.Equal(t, float64(0), events[0].EventDataExchangeRate.Value())
-	assert.Equal(t, 1613320668570, events[0].EventTimestamp.Value())
+	err := suite.testable.UnmarshalBody(reportData, &events)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "12345678900", events[0].Id)
+	assert.Equal(suite.T(), 1613320668570, events[0].Timestamp.Value())
+	assert.Equal(suite.T(), 12345678900, events[0].LastAttributedTouchDataTildeId.Value())
+	assert.Equal(suite.T(), false, events[0].DeepLinked.Value())
+	assert.Equal(suite.T(), false, events[0].FirstEventForUser.Value())
+	assert.Equal(suite.T(), 9876543210, events[0].DiMatchClickToken.Value())
+	assert.Equal(suite.T(), float64(0), events[0].EventDataRevenueInUsd.Value())
+	assert.Equal(suite.T(), float64(0), events[0].EventDataExchangeRate.Value())
+	assert.Equal(suite.T(), 1613320668570, events[0].EventTimestamp.Value())
 }
 
-func Test_HTTP_ResponseHandlerStream_ReadBody(t *testing.T) {
-	handler := &ResponseHandlerStream{}
+func (suite *HttpResponseHandlerStreamTestSuite) TestReadBody() {
 	expected, _ := ioutil.ReadFile("stubs/data/export/events/eo-click-v2.csv")
 	resp := buildStubResponseFromGzip(http.StatusOK, "stubs/data/export/events/eo-click-v2.csv")
-	data, err := handler.ReadBody(resp)
+	data, err := suite.testable.ReadBody(resp)
 
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, data)
-	assert.Equal(t, expected, data)
-	assert.Empty(t, body)
+	assert.NoError(suite.T(), err)
+	assert.NotEmpty(suite.T(), data)
+	assert.Equal(suite.T(), expected, data)
+	assert.Empty(suite.T(), body)
 }
 
-func Test_HTTP_ResponseHandlerStream_RestoreBody(t *testing.T) {
-	handler := &ResponseHandlerStream{}
+func (suite *HttpResponseHandlerStreamTestSuite) TestRestoreBody() {
 	expectedRaw, _ := ioutil.ReadFile("stubs/data/export/events/eo-click-v2.csv")
-	expectedGzipped, _ := loadStubResponseDataGzipped("stubs/data/export/events/eo-click-v2.csv")
+	//expectedGzipped, _ := loadStubResponseDataGzipped("stubs/data/export/events/eo-click-v2.csv")
 	resp := buildStubResponseFromGzip(http.StatusOK, "stubs/data/export/events/eo-click-v2.csv")
-	data, err := handler.ReadBody(resp)
-	closer, err := handler.RestoreBody(data)
+	data, err := suite.testable.ReadBody(resp)
+	closer, err := suite.testable.RestoreBody(data)
 	resp.Body = closer
 
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	assert.NoError(t, err)
-	assert.Equal(t, expectedRaw, data)
-	assert.NotEmpty(t, body)
-	fmt.Println(expectedGzipped)
-	fmt.Println(body)
-	//assert.Equal(t, expectedGzipped, body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), expectedRaw, data)
+	assert.NotEmpty(suite.T(), body)
+	//fmt.Println(expectedGzipped)
+	//fmt.Println(body)
+	//assert.Equal(suite.T(), expectedGzipped, body)
 }
 
-func Test_HTTP_ResponseHandlerJson_UnmarshalBody(t *testing.T) {
-	handler := &ResponseHandlerJson{}
+func TestHttpResponseHandlerStreamTestSuite(t *testing.T) {
+	suite.Run(t, new(HttpResponseHandlerStreamTestSuite))
+}
+
+type HttpResponseHandlerJsonTestSuite struct {
+	suite.Suite
+	testable *ResponseHandlerJson
+}
+
+func (suite *HttpResponseHandlerJsonTestSuite) SetupTest() {
+	suite.testable = &ResponseHandlerJson{}
+}
+
+func (suite *HttpResponseHandlerJsonTestSuite) TestUnmarshalBody() {
 	reportData, _ := ioutil.ReadFile("stubs/data/export/ontology/success.full.json")
 	var data EventOntology
-	err := handler.UnmarshalBody(reportData, &data)
-	assert.NoError(t, err)
-	assert.Equal(t, "https://branch-exports-web.foo-bar.amazonaws.com/eo_click.csv", data.Click[0])
+	err := suite.testable.UnmarshalBody(reportData, &data)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "https://branch-exports-web.foo-bar.amazonaws.com/eo_click.csv", data.Click[0])
 }
 
-func Test_HTTP_ResponseHandlerJson_ReadBody(t *testing.T) {
-	handler := &ResponseHandlerJson{}
+func (suite *HttpResponseHandlerJsonTestSuite) TestReadBody() {
 	expected, _ := ioutil.ReadFile("stubs/data/export/ontology/success.full.json")
 	resp := BuildStubResponseFromFile(http.StatusOK, "stubs/data/export/ontology/success.full.json")
-	data, err := handler.ReadBody(resp)
+	data, err := suite.testable.ReadBody(resp)
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, data)
-	assert.Equal(t, expected, data)
-	assert.Empty(t, body)
+	assert.NoError(suite.T(), err)
+	assert.NotEmpty(suite.T(), data)
+	assert.Equal(suite.T(), expected, data)
+	assert.Empty(suite.T(), body)
 }
 
-func Test_HTTP_ResponseHandlerJson_RestoreBody(t *testing.T) {
-	handler := &ResponseHandlerJson{}
+func (suite *HttpResponseHandlerJsonTestSuite) TestRestoreBody() {
 	expected, _ := ioutil.ReadFile("stubs/data/export/ontology/success.full.json")
 	resp := BuildStubResponseFromFile(http.StatusOK, "stubs/data/export/ontology/success.full.json")
-	data, _ := handler.ReadBody(resp)
-	closer, err := handler.RestoreBody(data)
+	data, _ := suite.testable.ReadBody(resp)
+	closer, err := suite.testable.RestoreBody(data)
 	resp.Body = closer
 
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, data)
-	assert.NotEmpty(t, body)
-	assert.Equal(t, expected, body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), expected, data)
+	assert.NotEmpty(suite.T(), body)
+	assert.Equal(suite.T(), expected, body)
 }
 
-func Test_HTTP_ResponseHandlerXml_ReadBody(t *testing.T) {
-	handler := &ResponseHandlerXml{}
+func TestHttpResponseHandlerJsonTestSuite(t *testing.T) {
+	suite.Run(t, new(HttpResponseHandlerJsonTestSuite))
+}
+
+type HttpResponseHandlerXmlTestSuite struct {
+	suite.Suite
+	testable *ResponseHandlerXml
+}
+
+func (suite *HttpResponseHandlerXmlTestSuite) SetupTest() {
+	suite.testable = &ResponseHandlerXml{}
+}
+
+func (suite *HttpResponseHandlerXmlTestSuite) TestReadBody() {
 	expected, _ := ioutil.ReadFile("stubs/data/export/events/forbidden.xml")
 	resp := BuildStubResponseFromFile(http.StatusOK, "stubs/data/export/events/forbidden.xml")
-	data, err := handler.ReadBody(resp)
+	data, err := suite.testable.ReadBody(resp)
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, data)
-	assert.Equal(t, expected, data)
-	assert.Empty(t, body)
+	assert.NoError(suite.T(), err)
+	assert.NotEmpty(suite.T(), data)
+	assert.Equal(suite.T(), expected, data)
+	assert.Empty(suite.T(), body)
 }
 
-func Test_HTTP_ResponseHandlerXml_UnmarshalBody(t *testing.T) {
-	handler := &ResponseHandlerXml{}
+func (suite *HttpResponseHandlerXmlTestSuite) TestUnmarshalBody() {
 	reportData, _ := ioutil.ReadFile("stubs/data/export/events/forbidden.xml")
 	var result EventError
-	err := handler.UnmarshalBody(reportData, &result)
-	assert.NoError(t, err)
-	assert.Equal(t, "AccessDenied", result.Code)
-	assert.Equal(t, "Access Denied", result.Message)
-	assert.Equal(t, "QWERTY", result.RequestId)
-	assert.Equal(t, "qwerty=", result.HostId)
+	err := suite.testable.UnmarshalBody(reportData, &result)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "AccessDenied", result.Code)
+	assert.Equal(suite.T(), "Access Denied", result.Message)
+	assert.Equal(suite.T(), "QWERTY", result.RequestId)
+	assert.Equal(suite.T(), "qwerty=", result.HostId)
 }
 
-func Test_HTTP_ResponseHandlerXml_RestoreBody(t *testing.T) {
-	handler := &ResponseHandlerXml{}
+func (suite *HttpResponseHandlerXmlTestSuite) TestRestoreBody() {
 	expected, _ := ioutil.ReadFile("stubs/data/export/events/forbidden.xml")
 	resp := BuildStubResponseFromFile(http.StatusOK, "stubs/data/export/events/forbidden.xml")
-	data, _ := handler.ReadBody(resp)
-	closer, err := handler.RestoreBody(data)
+	data, _ := suite.testable.ReadBody(resp)
+	closer, err := suite.testable.RestoreBody(data)
 	resp.Body = closer
 
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, data)
-	assert.NotEmpty(t, body)
-	assert.Equal(t, expected, body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), expected, data)
+	assert.NotEmpty(suite.T(), body)
+	assert.Equal(suite.T(), expected, body)
+}
+
+func TestHttpResponseHandlerXmlTestSuite(t *testing.T) {
+	suite.Run(t, new(HttpResponseHandlerXmlTestSuite))
 }
