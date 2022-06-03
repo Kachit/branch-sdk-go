@@ -2,25 +2,34 @@ package branchio
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"testing"
 )
 
-func Test_Client_NewClientFromConfig(t *testing.T) {
-	client, err := NewClientFromConfig(BuildStubConfig(), nil)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, client)
+type ClientTestSuite struct {
+	suite.Suite
 }
 
-func Test_Client_NewClientFromConfigInvalid(t *testing.T) {
+func (suite *ClientTestSuite) TestNewClientFromConfig() {
+	client, err := NewClientFromConfig(BuildStubConfig(), nil)
+	assert.NoError(suite.T(), err)
+	assert.NotEmpty(suite.T(), client)
+}
+
+func (suite *ClientTestSuite) TestNewClientFromConfigInvalid() {
 	cfg := BuildStubConfig()
 	cfg.Uri = ""
 	client, err := NewClientFromConfig(cfg, nil)
-	assert.Error(t, err)
-	assert.Empty(t, client)
+	assert.Error(suite.T(), err)
+	assert.Empty(suite.T(), client)
 }
 
-func Test_Client_GetExportResource(t *testing.T) {
+func (suite *ClientTestSuite) TestGetExportResource() {
 	client, _ := NewClientFromConfig(BuildStubConfig(), nil)
 	result := client.Export()
-	assert.NotEmpty(t, result)
+	assert.NotEmpty(suite.T(), result)
+}
+
+func TestClientTestSuite(t *testing.T) {
+	suite.Run(t, new(ClientTestSuite))
 }

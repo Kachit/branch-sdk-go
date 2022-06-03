@@ -2,39 +2,51 @@ package branchio
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"testing"
 )
 
-func Test_Config_NewConfig(t *testing.T) {
-	result := NewConfig("foo", "bar")
-	assert.Equal(t, ProdAPIUrl, result.Uri)
-	assert.Equal(t, "foo", result.Key)
-	assert.Equal(t, "bar", result.Secret)
+type ConfigTestSuite struct {
+	suite.Suite
+	testable *Config
 }
 
-func Test_Config_IsValidSuccess(t *testing.T) {
-	config := Config{Uri: ProdAPIUrl, Key: "foo", Secret: "bar"}
-	assert.Nil(t, config.IsValid())
-	assert.NoError(t, config.IsValid())
+func (suite *ConfigTestSuite) SetupTest() {
+	suite.testable = NewConfig("foo", "bar")
 }
 
-func Test_Config_IsValidEmptyUri(t *testing.T) {
-	filter := Config{Key: "foo", Secret: "bar"}
-	result := filter.IsValid()
-	assert.Error(t, result)
-	assert.Equal(t, `parameter "uri" is empty`, result.Error())
+func (suite *ConfigTestSuite) TestNewConfigByDefault() {
+	assert.Equal(suite.T(), ProdAPIUrl, suite.testable.Uri)
+	assert.Equal(suite.T(), "foo", suite.testable.Key)
+	assert.Equal(suite.T(), "bar", suite.testable.Secret)
 }
 
-func Test_Config_IsValidEmptyPublicKey(t *testing.T) {
-	filter := Config{Uri: ProdAPIUrl, Key: "", Secret: "bar"}
-	result := filter.IsValid()
-	assert.Error(t, result)
-	assert.Equal(t, `parameter "key" is empty`, result.Error())
+func (suite *ConfigTestSuite) TestIsValidSuccess() {
+	assert.Nil(suite.T(), suite.testable.IsValid())
+	assert.NoError(suite.T(), suite.testable.IsValid())
 }
 
-func Test_Config_IsValidEmptySecretKey(t *testing.T) {
-	filter := Config{Uri: ProdAPIUrl, Key: "foo", Secret: ""}
-	result := filter.IsValid()
-	assert.Error(t, result)
-	assert.Equal(t, `parameter "secret" is empty`, result.Error())
+func (suite *ConfigTestSuite) TestIsValidEmptyUri() {
+	suite.testable.Uri = ""
+	result := suite.testable.IsValid()
+	assert.Error(suite.T(), result)
+	assert.Equal(suite.T(), `parameter "uri" is empty`, result.Error())
+}
+
+func (suite *ConfigTestSuite) TestIsValidEmptyPublicKey() {
+	suite.testable.Key = ""
+	result := suite.testable.IsValid()
+	assert.Error(suite.T(), result)
+	assert.Equal(suite.T(), `parameter "key" is empty`, result.Error())
+}
+
+func (suite *ConfigTestSuite) TestIsValidEmptySecretKey() {
+	suite.testable.Secret = ""
+	result := suite.testable.IsValid()
+	assert.Error(suite.T(), result)
+	assert.Equal(suite.T(), `parameter "secret" is empty`, result.Error())
+}
+
+func TestConfigTestSuite(t *testing.T) {
+	suite.Run(t, new(ConfigTestSuite))
 }
