@@ -10,7 +10,7 @@ import (
 
 type ResourceAbstractTestSuite struct {
 	suite.Suite
-	testable *ResourceAbstract
+	testable ResourceAbstract
 }
 
 func (suite *ResourceAbstractTestSuite) SetupTest() {

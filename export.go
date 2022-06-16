@@ -10,7 +10,7 @@ import (
 
 //EventOntologyResponse struct
 type EventOntologyResponse struct {
-	*ResponseBody
+	ResponseBody
 	Data *EventOntology `json:"data,omitempty"`
 }
 
@@ -54,7 +54,7 @@ func (r *EventOntology) IsEmpty() bool {
 
 //EventResponse struct
 type EventResponse struct {
-	*ResponseBody
+	ResponseBody
 	Data []*Event `json:"data,omitempty"`
 }
 
@@ -209,7 +209,7 @@ type EventError struct {
 
 //ExportResource resource wrapper
 type ExportResource struct {
-	*ResourceAbstract
+	ResourceAbstract
 }
 
 //GetEventOntology Get events ontology data
@@ -219,7 +219,7 @@ func (r *ExportResource) GetEventOntology(ctx context.Context, date time.Time) (
 	if err != nil {
 		return nil, nil, fmt.Errorf("ExportResource.GetEventOntology error: %v", err)
 	}
-	result := EventOntologyResponse{ResponseBody: &ResponseBody{}}
+	result := EventOntologyResponse{}
 	result.status = rsp.StatusCode
 	if result.IsSuccess() {
 		var data EventOntology
@@ -246,7 +246,7 @@ func (r *ExportResource) GetEventData(ctx context.Context, link string) (*EventR
 	if err != nil {
 		return nil, nil, fmt.Errorf("ExportResource.GetEventData error: %v", err)
 	}
-	result := EventResponse{ResponseBody: &ResponseBody{}}
+	result := EventResponse{}
 	result.status = rsp.StatusCode
 	if result.IsSuccess() {
 		events := []*Event{}

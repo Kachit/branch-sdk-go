@@ -7,179 +7,202 @@ import (
 	"time"
 )
 
-type TypesTestSuite struct {
+type TypesCustomIntegerTestSuite struct {
 	suite.Suite
+	testable *CustomInteger
 }
 
-func (suite *TypesTestSuite) TestCustomIntegerMarshalJSONSuccess() {
-	c := CustomInteger{}
-	c.Integer = 10
-	result, err := c.MarshalJSON()
+func (suite *TypesCustomIntegerTestSuite) SetupTest() {
+	suite.testable = &CustomInteger{}
+}
+
+func (suite *TypesCustomIntegerTestSuite) TestMarshalJSONSuccess() {
+	suite.testable.Integer = 10
+	result, err := suite.testable.MarshalJSON()
 	expected := []byte(`10`)
 	assert.Equal(suite.T(), expected, result)
 	assert.Nil(suite.T(), err)
 }
 
-func (suite *TypesTestSuite) TestCustomIntegerMarshalJSONEmpty() {
-	c := CustomInteger{}
-	result, err := c.MarshalJSON()
+func (suite *TypesCustomIntegerTestSuite) TestMarshalJSONEmpty() {
+	result, err := suite.testable.MarshalJSON()
 	expected := []byte(`0`)
 	assert.Equal(suite.T(), expected, result)
 	assert.Nil(suite.T(), err)
 }
 
-func (suite *TypesTestSuite) TestCustomIntegerUnmarshalCSVFilled() {
-	c := CustomInteger{}
+func (suite *TypesCustomIntegerTestSuite) TestUnmarshalCSVFilled() {
 	str := "12345"
-	err := c.UnmarshalCSV(str)
+	err := suite.testable.UnmarshalCSV(str)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), 12345, c.Value())
+	assert.Equal(suite.T(), 12345, suite.testable.Value())
 }
 
-func (suite *TypesTestSuite) TestCustomIntegerUnmarshalCSVEmpty() {
-	c := CustomInteger{}
+func (suite *TypesCustomIntegerTestSuite) TestUnmarshalCSVEmpty() {
 	str := ""
-	err := c.UnmarshalCSV(str)
+	err := suite.testable.UnmarshalCSV(str)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), 0, c.Value())
+	assert.Equal(suite.T(), 0, suite.testable.Value())
 }
 
-func (suite *TypesTestSuite) TestCustomIntegerUnmarshalCSVError() {
-	c := CustomInteger{}
+func (suite *TypesCustomIntegerTestSuite) TestUnmarshalCSVError() {
 	str := "foo"
-	err := c.UnmarshalCSV(str)
+	err := suite.testable.UnmarshalCSV(str)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), `CustomInteger@UnmarshalCSV Parse int: strconv.Atoi: parsing "foo": invalid syntax`, err.Error())
 }
 
-func (suite *TypesTestSuite) TestCustomFloat64MarshalJSONSuccess() {
-	c := CustomFloat64{}
-	c.Float64 = 10.10
-	result, err := c.MarshalJSON()
+type TypesCustomFloat64TestSuite struct {
+	suite.Suite
+	testable *CustomFloat64
+}
+
+func (suite *TypesCustomFloat64TestSuite) SetupTest() {
+	suite.testable = &CustomFloat64{}
+}
+
+func (suite *TypesCustomFloat64TestSuite) TestMarshalJSONSuccess() {
+	suite.testable.Float64 = 10.10
+	result, err := suite.testable.MarshalJSON()
 	expected := []byte(`10.1`)
 	assert.Equal(suite.T(), expected, result)
 	assert.Nil(suite.T(), err)
 }
 
-func (suite *TypesTestSuite) TestCustomFloat64MarshalJSONEmpty() {
-	c := CustomFloat64{}
-	c.Float64 = 10.10
-	result, err := c.MarshalJSON()
+func (suite *TypesCustomFloat64TestSuite) TestMarshalJSONEmpty() {
+	suite.testable.Float64 = 10.10
+	result, err := suite.testable.MarshalJSON()
 	expected := []byte(`10.1`)
 	assert.Equal(suite.T(), expected, result)
 	assert.Nil(suite.T(), err)
 }
 
-func (suite *TypesTestSuite) TestCustomFloat64UnmarshalCSVFilled() {
-	c := CustomFloat64{}
+func (suite *TypesCustomFloat64TestSuite) TestUnmarshalCSVFilled() {
 	str := "123.45"
-	err := c.UnmarshalCSV(str)
+	err := suite.testable.UnmarshalCSV(str)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), 123.44999694824219, c.Value())
+	assert.Equal(suite.T(), 123.44999694824219, suite.testable.Value())
 }
 
-func (suite *TypesTestSuite) TestCustomFloat64_UnmarshalCSVEmpty() {
-	c := CustomFloat64{}
+func (suite *TypesCustomFloat64TestSuite) TestUnmarshalCSVEmpty() {
 	str := ""
-	err := c.UnmarshalCSV(str)
+	err := suite.testable.UnmarshalCSV(str)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), float64(0), c.Value())
+	assert.Equal(suite.T(), float64(0), suite.testable.Value())
 }
 
-func (suite *TypesTestSuite) TestCustomFloat64UnmarshalCSVError() {
-	c := CustomFloat64{}
+func (suite *TypesCustomFloat64TestSuite) TestUnmarshalCSVError() {
 	str := "foo"
-	err := c.UnmarshalCSV(str)
+	err := suite.testable.UnmarshalCSV(str)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), `CustomFloat64@UnmarshalCSV Parse float: strconv.ParseFloat: parsing "foo": invalid syntax`, err.Error())
 }
 
-func (suite *TypesTestSuite) TestCustomTimestampUnmarshalCSVFilled() {
-	c := CustomTimestamp{}
+type TypesCustomTimestampTestSuite struct {
+	suite.Suite
+	testable *CustomTimestamp
+}
+
+func (suite *TypesCustomTimestampTestSuite) SetupTest() {
+	suite.testable = &CustomTimestamp{}
+}
+
+func (suite *TypesCustomTimestampTestSuite) TestUnmarshalCSVFilled() {
 	str := "2020-09-10 15:15:15+0000"
-	err := c.UnmarshalCSV(str)
+	err := suite.testable.UnmarshalCSV(str)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), "2020-09-10 15:15:15+0000", c.Value().Format(CustomTimestampFormatDefault))
+	assert.Equal(suite.T(), "2020-09-10 15:15:15+0000", suite.testable.Value().Format(CustomTimestampFormatDefault))
 }
 
-func (suite *TypesTestSuite) TestCustomTimestampUnmarshalCSVEmpty() {
-	c := CustomTimestamp{}
+func (suite *TypesCustomTimestampTestSuite) TestUnmarshalCSVEmpty() {
 	str := ""
-	err := c.UnmarshalCSV(str)
+	err := suite.testable.UnmarshalCSV(str)
 	assert.NoError(suite.T(), err)
-	assert.True(suite.T(), c.Value().IsZero())
+	assert.True(suite.T(), suite.testable.Value().IsZero())
 }
 
-func (suite *TypesTestSuite) TestCustomTimestampUnmarshalCSVError() {
-	c := CustomTimestamp{}
+func (suite *TypesCustomTimestampTestSuite) TestUnmarshalCSVError() {
 	str := "foo"
-	err := c.UnmarshalCSV(str)
+	err := suite.testable.UnmarshalCSV(str)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), `CustomTimestamp@UnmarshalJSON ParseTime: parsing time "foo" as "2006-01-02 15:04:05-0700": cannot parse "foo" as "2006"`, err.Error())
 }
 
-func (suite *TypesTestSuite) TestCustomTimestampMarshalJSONSuccess() {
-	c := CustomTimestamp{}
-	c.Timestamp = time.Date(2020, time.Month(1), 20, 0, 0, 0, 0, time.UTC)
-	result, err := c.MarshalJSON()
+func (suite *TypesCustomTimestampTestSuite) TestMarshalJSONSuccess() {
+	suite.testable.Timestamp = time.Date(2020, time.Month(1), 20, 0, 0, 0, 0, time.UTC)
+	result, err := suite.testable.MarshalJSON()
 	assert.Equal(suite.T(), []byte(`"2020-01-20 00:00:00+0000"`), result)
 	assert.Nil(suite.T(), err)
 }
 
-func (suite *TypesTestSuite) TestCustomTimestampMarshalJSONEmpty() {
-	c := CustomTimestamp{}
-	result, err := c.MarshalJSON()
+func (suite *TypesCustomTimestampTestSuite) TestMarshalJSONEmpty() {
+	result, err := suite.testable.MarshalJSON()
 	assert.Equal(suite.T(), []byte(`""`), result)
 	assert.Nil(suite.T(), err)
 }
 
-func (suite *TypesTestSuite) TestCustomBooleanUnmarshalCSVTrue() {
-	c := CustomBoolean{}
+type TypesCustomBooleanTestSuite struct {
+	suite.Suite
+	testable *CustomBoolean
+}
+
+func (suite *TypesCustomBooleanTestSuite) SetupTest() {
+	suite.testable = &CustomBoolean{}
+}
+
+func (suite *TypesCustomBooleanTestSuite) TestUnmarshalCSVTrue() {
 	str := "true"
-	err := c.UnmarshalCSV(str)
+	err := suite.testable.UnmarshalCSV(str)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), true, c.Value())
+	assert.Equal(suite.T(), true, suite.testable.Value())
 }
 
-func (suite *TypesTestSuite) TestCustomBooleanUnmarshalCSVFalse() {
-	c := CustomBoolean{}
+func (suite *TypesCustomBooleanTestSuite) TestUnmarshalCSVFalse() {
 	str := "false"
-	err := c.UnmarshalCSV(str)
+	err := suite.testable.UnmarshalCSV(str)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), false, c.Value())
+	assert.Equal(suite.T(), false, suite.testable.Value())
 }
 
-func (suite *TypesTestSuite) TestCustomBooleanUnmarshalCSVEmpty() {
-	c := CustomBoolean{}
+func (suite *TypesCustomBooleanTestSuite) TestUnmarshalCSVEmpty() {
 	str := ""
-	err := c.UnmarshalCSV(str)
+	err := suite.testable.UnmarshalCSV(str)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), false, c.Value())
+	assert.Equal(suite.T(), false, suite.testable.Value())
 }
 
-func (suite *TypesTestSuite) TestCustomBooleanUnmarshalCSVError() {
-	c := CustomBoolean{}
+func (suite *TypesCustomBooleanTestSuite) TestUnmarshalCSVError() {
 	str := "foo"
-	err := c.UnmarshalCSV(str)
+	err := suite.testable.UnmarshalCSV(str)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), false, c.Value())
+	assert.Equal(suite.T(), false, suite.testable.Value())
 }
 
-func (suite *TypesTestSuite) TestCustomBooleanMarshalJSONSuccess() {
-	c := CustomBoolean{}
-	c.Boolean = true
-	result, err := c.MarshalJSON()
+func (suite *TypesCustomBooleanTestSuite) TestMarshalJSONSuccess() {
+	suite.testable.Boolean = true
+	result, err := suite.testable.MarshalJSON()
 	assert.Equal(suite.T(), []byte(`true`), result)
 	assert.Nil(suite.T(), err)
 }
 
-func (suite *TypesTestSuite) TestCustomBooleanMarshalJSONEmpty() {
-	c := CustomBoolean{}
-	result, err := c.MarshalJSON()
+func (suite *TypesCustomBooleanTestSuite) TestMarshalJSONEmpty() {
+	result, err := suite.testable.MarshalJSON()
 	assert.Equal(suite.T(), []byte(`false`), result)
 	assert.Nil(suite.T(), err)
 }
 
-func TestTypesTestSuite(t *testing.T) {
-	suite.Run(t, new(TypesTestSuite))
+func TestTypesCustomIntegerTestSuite(t *testing.T) {
+	suite.Run(t, new(TypesCustomIntegerTestSuite))
+}
+
+func TestTypesCustomFloat64TestSuite(t *testing.T) {
+	suite.Run(t, new(TypesCustomFloat64TestSuite))
+}
+
+func TestTypesCustomTimestampTestSuite(t *testing.T) {
+	suite.Run(t, new(TypesCustomTimestampTestSuite))
+}
+
+func TestTypesCustomBooleanTestSuite(t *testing.T) {
+	suite.Run(t, new(TypesCustomBooleanTestSuite))
 }

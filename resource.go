@@ -30,6 +30,6 @@ func (ra *ResourceAbstract) unmarshalResponse(resp *http.Response, v interface{}
 }
 
 //NewResourceAbstract Create new resource abstract
-func NewResourceAbstract(transport *Transport) *ResourceAbstract {
-	return &ResourceAbstract{tr: transport, cfg: transport.rb.cfg}
+func NewResourceAbstract(transport *Transport) ResourceAbstract {
+	return ResourceAbstract{tr: transport, cfg: transport.rb.cfg}
 }

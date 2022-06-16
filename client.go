@@ -22,5 +22,5 @@ func NewClientFromConfig(config *Config, cl *http.Client) (*Client, error) {
 
 //Export resource
 func (c *Client) Export() *ExportResource {
-	return &ExportResource{ResourceAbstract: NewResourceAbstract(c.transport)}
+	return &ExportResource{NewResourceAbstract(c.transport)}
 }
